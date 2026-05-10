@@ -30,32 +30,17 @@ body {
     flex-wrap: wrap;
 }
 
-.filter-controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.filter-btn {
-    padding: 8px 16px;
-    border: 2px solid #fff;
-    background-color: transparent;
-    color: #fff;
+#searchInput {
+    padding: 10px 20px;
+    border: none;
     border-radius: 5px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: all 0.3s;
+    font-size: 1em;
+    min-width: 300px;
+    outline: none;
 }
 
-.filter-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.filter-btn.active {
-    background-color: #fff;
-    color: #2c3e50;
-    font-weight: bold;
+#searchInput:focus {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
 }
 
 #collectionSelect {
@@ -198,6 +183,28 @@ body {
     justify-content: space-between;
 }
 
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 3px;
+}
+
+.konami-logo {
+    height: 14px;
+    width: auto;
+    object-fit: contain;
+}
+
+.orica-text {
+    font-weight: bold;
+    font-size: 0.7em;
+    color: #e74c3c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .card-number {
     font-weight: bold;
     color: #8B4513;
@@ -274,25 +281,6 @@ body {
 .card-slot.zero-quantity .card-image,
 .card-slot.zero-quantity .card-info {
     opacity: 0.5;
-}
-
-/* Badge Orica */
-.orica-badge {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.7em;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-}
-
-.orica-badge::before {
-    content: '🎨 ';
 }
 
 /* Navegação */

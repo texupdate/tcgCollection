@@ -2,35 +2,21 @@ let currentCollection = null;
 let currentPage = 0;
 let allCards = [];
 let minCardNumber = 0; // Número mínimo da coleção (0 ou 1)
-let searchTerm = ''; // Termo de busca
+let currentFilter = 'all'; // all, original, orica
 const CARDS_PER_PAGE = 18;
 
 // Carrega as coleções ao iniciar
 window.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Página carregada, iniciando...');
     loadCollections();
 });
 
 // Carrega todas as coleções
 async function loadCollections() {
-    console.log('🔄 Carregando coleções...');
     try {
         const response = await fetch('/api/collections');
-        console.log('📡 Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const collections = await response.json();
-        console.log('📚 Coleções recebidas:', collections.length, collections);
         
         const select = document.getElementById('collectionSelect');
-        if (!select) {
-            console.error('❌ Select element não encontrado!');
-            return;
-        }
-        
         select.innerHTML = '<option value="">Selecione uma coleção...</option>';
         
         collections.forEach(collection => {
@@ -40,14 +26,11 @@ async function loadCollections() {
             select.appendChild(option);
         });
         
-        console.log('✅ Coleções carregadas com sucesso!');
-        
         if (collections.length === 0) {
             showEmptyState();
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar coleções:', error);
-        alert('Erro ao carregar coleções. Verifique se o servidor está rodando.');
+        console.error('Erro ao carregar coleções:', error);
     }
 }
 
@@ -56,8 +39,15 @@ function changeCollection() {
     const select = document.getElementById('collectionSelect');
     currentCollection = select.value;
     currentPage = 0;
-    searchTerm = ''; // Limpar busca ao trocar coleção
-    document.getElementById('searchInput').value = '';
+    currentFilter = 'all'; // Reset filter ao trocar coleção
+    
+    // Reset active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        }
+    });
     
     if (currentCollection) {
         loadCards();
@@ -65,14 +55,6 @@ function changeCollection() {
     } else {
         showEmptyState();
     }
-}
-
-// Filtrar por busca de nome
-function filterBySearch() {
-    const input = document.getElementById('searchInput');
-    searchTerm = input.value.toLowerCase();
-    currentPage = 0; // Voltar para primeira página ao buscar
-    renderCurrentPage();
 }
 
 // Define o filtro de tipo de carta
@@ -89,11 +71,21 @@ function setFilter(filter) {
     });
     
     renderCurrentPage();
-}
-
-// Carrega as cartas de uma coleção
-async function loadCards() {
-    try {
+}// Filtrar cartas baseado no filtro atual
+    let filteredCards = allCards;
+    if (currentFilter === 'original') {
+        filteredCards = allCards.filter(c => !c.is_orica);
+    } else if (currentFilter === 'orica') {
+        filteredCards = allCards.filter(c => c.is_orica);
+    }
+    
+    const startCardNumber = minCardNumber + (currentPage * CARDS_PER_PAGE);
+    const endCardNumber = startCardNumber + CARDS_PER_PAGE;
+    
+    // Obter todas as cartas da página atual
+    const pageCards = [];
+    for (let i = startCardNumber; i < endCardNumber; i++) {
+        const card = filtered
         const response = await fetch(`/api/collections/${currentCollection}/cards`);
         allCards = await response.json();
         
@@ -112,21 +104,13 @@ async function loadCards() {
 
 // Renderiza a página atual
 function renderCurrentPage() {
-    // Filtrar cartas por termo de busca
-    let filteredCards = allCards;
-    if (searchTerm) {
-        filteredCards = allCards.filter(c => 
-            c.name.toLowerCase().includes(searchTerm)
-        );
-    }
-    
     const startCardNumber = minCardNumber + (currentPage * CARDS_PER_PAGE);
     const endCardNumber = startCardNumber + CARDS_PER_PAGE;
     
     // Obter todas as cartas da página atual
     const pageCards = [];
     for (let i = startCardNumber; i < endCardNumber; i++) {
-        const card = filteredCards.find(c => c.collection_number === i);
+        const card = allCards.find(c => c.collection_number === i);
         pageCards.push(card || null);
     }
     
@@ -148,18 +132,17 @@ function renderCurrentPage() {
 function renderCardSlot(slot, card, cardNumber) {
     slot.innerHTML = '';
     slot.className = 'card-slot';
-    
-    if (card) {
+    // Badge para Orica
+        const oricaBadge = card.is_orica ? '<div class="orica-badge">ORICA</div>' : '';
+        
+        slot.innerHTML = `
+            <div class="card-content">
+                ${oricaBadge}
         // Carta existe
         const isZero = card.quantity === 0;
         if (isZero) {
             slot.classList.add('zero-quantity');
         }
-        
-        // Logo Konami ou texto Orica ao lado do número
-        const origemHtml = card.tipoOrigem === 'Orica' 
-            ? '<span class="orica-text">Orica</span>'
-            : '<img src="/static/konami-logo.svg" alt="Konami" class="konami-logo" onerror="this.style.display=\'none\'">';
         
         slot.innerHTML = `
             <div class="card-content">
@@ -168,10 +151,7 @@ function renderCardSlot(slot, card, cardNumber) {
                      class="card-image"
                      onerror="this.src='https://via.placeholder.com/200x280?text=Erro+ao+carregar'">
                 <div class="card-info">
-                    <div class="card-header">
-                        ${origemHtml}
-                        <div class="card-number">#${card.collection_number}</div>
-                    </div>
+                    <div class="card-number">#${card.collection_number}</div>
                     <div class="card-name" title="${card.name}">${card.name}</div>
                     <div class="card-quantity">
                         <button class="quantity-btn" onclick="decrementCard(${card.id})" ${card.quantity === 0 ? 'disabled' : ''}>−</button>
