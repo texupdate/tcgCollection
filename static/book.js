@@ -161,16 +161,13 @@ function renderCardSlot(slot, card, cardNumber) {
             ? '<span class="orica-text">Orica</span>'
             : '<img src="/static/konami-logo.svg" alt="Konami" class="konami-logo" onerror="this.style.display=\'none\'">';
         
-        // Se não tem imagem, tenta buscar via API
+        // Se não tem imagem, tenta buscar via API YGOPRODeck
         let imageUrl = card.image_url;
         if (!imageUrl || imageUrl === 'None' || imageUrl === '') {
-            // Para cartas Konami, tenta buscar na API YGOPRODeck
-            if (card.tipoOrigem === 'Konami') {
-                imageUrl = `https://images.ygoprodeck.com/images/cards/${card.name.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
-            } else {
-                // Para Oricas, usa placeholder customizado
-                imageUrl = 'https://via.placeholder.com/200x280/f5576c/ffffff?text=ORICA';
-            }
+            // Tenta buscar na API YGOPRODeck para Konami e Orica
+            // Limpar nome da carta para criar URL válida
+            const cleanName = card.name.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '%20');
+            imageUrl = `https://images.ygoprodeck.com/images/cards/${cleanName}.jpg`;
         }
         
         slot.innerHTML = `
