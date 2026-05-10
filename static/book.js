@@ -1,6 +1,7 @@
 let currentCollection = null;
 let currentPage = 0;
 let allCards = [];
+let minCardNumber = 0; // Número mínimo da coleção (0 ou 1)
 const CARDS_PER_PAGE = 18;
 
 // Carrega as coleções ao iniciar
@@ -54,6 +55,13 @@ async function loadCards() {
         const response = await fetch(`/api/collections/${currentCollection}/cards`);
         allCards = await response.json();
         
+        // Detectar o número mínimo da coleção (0 ou 1)
+        if (allCards.length > 0) {
+            minCardNumber = Math.min(...allCards.map(c => c.collection_number));
+        } else {
+            minCardNumber = 0;
+        }
+        
         renderCurrentPage();
     } catch (error) {
         console.error('Erro ao carregar cartas:', error);
@@ -62,20 +70,20 @@ async function loadCards() {
 
 // Renderiza a página atual
 function renderCurrentPage() {
-    const startIndex = currentPage * CARDS_PER_PAGE;
-    const endIndex = startIndex + CARDS_PER_PAGE;
+    const startCardNumber = minCardNumber + (currentPage * CARDS_PER_PAGE);
+    const endCardNumber = startCardNumber + CARDS_PER_PAGE;
     
-    // Obter todas as cartas da página atual (começando do 0)
+    // Obter todas as cartas da página atual
     const pageCards = [];
-    for (let i = startIndex; i < endIndex; i++) {
+    for (let i = startCardNumber; i < endCardNumber; i++) {
         const card = allCards.find(c => c.collection_number === i);
         pageCards.push(card || null);
     }
     
-    // Renderizar cartas nos slots (0-8 esquerda, 9-17 direita)
+    // Renderizar cartas nos slots
     for (let i = 0; i < CARDS_PER_PAGE; i++) {
         const slotNumber = i + 1;
-        const cardNumber = startIndex + i;
+        const cardNumber = startCardNumber + i;
         const card = pageCards[i];
         
         const slot = document.querySelector(`.card-slot[data-slot="${slotNumber}"]`);
@@ -205,16 +213,21 @@ function updatePagination() {
     const totalCards = getTotalCardsInCollection();
     const totalPages = Math.ceil(totalCards / CARDS_PER_PAGE);
     
-    const startCard = currentPage * CARDS_PER_PAGE;
-    const endCard = Math.min((currentPage + 1) * CARDS_PER_PAGE - 1, totalCards - 1);
+    const startCard = minCardNumber + (currentPage * CARDS_PER_PAGE);
+    const endCard = Math.min(startCard + CARDS_PER_PAGE - 1, minCardNumber + totalCards - 1);
     
     document.getElementById('pageInfo').textContent = 
         `Cartas ${startCard}-${endCard} de ${totalCards}`;
     
+    const leftStart = startCard;
+    const leftEnd = Math.min(startCard + 8, endCard);
+    const rightStart = startCard + 9;
+    const rightEnd = endCard;
+    
     document.getElementById('leftPageNumber').textContent = 
-        `Cartas ${startCard}-${startCard + 8}`;
+        `Cartas ${leftStart}-${leftEnd}`;
     document.getElementById('rightPageNumber').textContent = 
-        `Cartas ${startCard + 9}-${endCard}`;
+        `Cartas ${rightStart}-${rightEnd}`;
     
     // Habilitar/desabilitar botões
     document.getElementById('prevBtn').disabled = currentPage === 0;
