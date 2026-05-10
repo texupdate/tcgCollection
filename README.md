@@ -8,6 +8,7 @@ Aplicação web localhost para gerenciar sua coleção de cartas TCG com visuali
 - 📚 Múltiplas coleções com numeração própria
 - 📖 Visualização em formato de livro aberto (18 cartas por página)
 - ➕➖ Controle de estoque com botões + e - 
+- 🎨 Segmentação Original vs Orica (customizadas/proxies)
 - 🖼️ Imagens das cartas via URL
 - 📊 Efeito visual para cartas com quantidade zero
 - 🔍 Busca e filtros
@@ -27,7 +28,9 @@ Aplicação web localhost para gerenciar sua coleção de cartas TCG com visuali
 - Cadastrar cartas com número específico por coleção
 - Incrementar/decrementar quantidade diretamente no livro
 - Editar e remover cartas e coleções
+- **🎨 Filtros Original vs Orica** (veja [GUIA_ORICA_RAPIDO.md](GUIA_ORICA_RAPIDO.md))
 - **📥 Importação em massa via CSV** (veja [README_IMPORT.md](README_IMPORT.md))
+- **🖼️ Busca automática de imagens Yu-Gi-Oh** (veja [README_IMAGES.md](README_IMAGES.md))
 
 ## 🛠️ Tecnologias
 
