@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCG Collection Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🃏 TCG Collection Manager</h1>
+            <p>Gerencie sua coleção de cartas</p>
+        </header>
+
+        <div class="stats-section" id="stats">
+            <div class="stat-card">
+                <h3>Total de Cartas</h3>
+                <p class="stat-value" id="totalCards">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Cartas Únicas</h3>
+                <p class="stat-value" id="uniqueCards">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Valor Total</h3>
+                <p class="stat-value" id="totalValue">R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="showAddCardForm()">➕ Adicionar Carta</button>
+            <button class="btn btn-secondary" onclick="loadCards()">🔄 Atualizar</button>
+        </div>
+
+        <div id="addCardForm" class="card-form" style="display: none;">
+            <h2>Adicionar Nova Carta</h2>
+            <form id="cardForm">
+                <div class="form-group">
+                    <label for="name">Nome da Carta *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="set_name">Nome do Set</label>
+                    <input type="text" id="set_name">
+                </div>
+                <div class="form-group">
+                    <label for="card_number">Número da Carta</label>
+                    <input type="text" id="card_number">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rarity">Raridade</label>
+                        <select id="rarity">
+                            <option value="">Selecione...</option>
+                            <option value="Common">Comum</option>
+                            <option value="Uncommon">Incomum</option>
+                            <option value="Rare">Rara</option>
+                            <option value="Super Rare">Super Rara</option>
+                            <option value="Ultra Rare">Ultra Rara</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Quantidade</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="condition">Condição</label>
+                        <select id="condition">
+                            <option value="">Selecione...</option>
+                            <option value="Mint">Mint</option>
+                            <option value="Near Mint">Near Mint</option>
+                            <option value="Excellent">Excelente</option>
+                            <option value="Good">Bom</option>
+                            <option value="Played">Jogado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Idioma</label>
+                        <input type="text" id="language" value="Português">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notas</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddCardForm()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="cards-section">
+            <h2>Sua Coleção</h2>
+            <div id="cardsList" class="cards-list">
+                <p class="empty-state">Nenhuma carta cadastrada ainda. Clique em "Adicionar Carta" para começar!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
