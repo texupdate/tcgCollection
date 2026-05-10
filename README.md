@@ -27,12 +27,14 @@ Aplicação web localhost para gerenciar sua coleção de cartas TCG com visuali
 - Cadastrar cartas com número específico por coleção
 - Incrementar/decrementar quantidade diretamente no livro
 - Editar e remover cartas e coleções
+- **📥 Importação em massa via CSV** (veja [README_IMPORT.md](README_IMPORT.md))
 
 ## 🛠️ Tecnologias
 
 - **Backend**: Python + Flask
 - **Banco de Dados**: SQLite
 - **Frontend**: HTML/CSS/JavaScript
+- **API REST**: Para integração e importação
 
 ## 🚀 Instalação
 
@@ -63,6 +65,18 @@ python app.py
 # Acesse no navegador
 http://localhost:5000
 ```
+
+### 📥 Importação em Massa (CSV)
+
+Para importar muitas cartas de uma vez:
+
+```bash
+# 1. Prepare seu arquivo CSV (veja template_import.csv)
+# 2. Execute o script de importação
+python import_cards.py seu_arquivo.csv
+```
+
+Veja [README_IMPORT.md](README_IMPORT.md) para documentação completa.
 
 ## 📁 Estrutura do Projeto
 

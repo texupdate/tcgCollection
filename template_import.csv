@@ -1,0 +1,3 @@
+collection_name,card_number,card_name,image_url,rarity,quantity,set_name,set_card_number,condition,language,notes
+Minha Coleção,1,Nome da Carta 1,https://exemplo.com/imagem1.jpg,Rare,0,,,,,
+Minha Coleção,2,Nome da Carta 2,https://exemplo.com/imagem2.jpg,Common,1,,,,,
