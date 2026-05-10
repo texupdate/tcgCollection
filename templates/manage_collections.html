@@ -98,7 +98,7 @@
         async function loadCollections() {
             try {
                 const response = await fetch('/api/collections');
-                const collections = await response.json();'${encodeURIComponent(col.name)
+                const collections = await response.json();
                 
                 const container = document.getElementById('collections-list');
                 
@@ -112,7 +112,7 @@
                     const collectionImagePath = `/static/collection_bkg/${col.name}.png`;
                     
                     return `
-                    <div class="collection-card" onclick="viewCollection(${col.id}, '${col.name}')">
+                    <div class="collection-card" onclick="viewCollection('${encodeURIComponent(col.name)}')">
                         <div class="collection-icon-img">
                             <img src="${collectionImagePath}" 
                                  alt="${col.name}" 

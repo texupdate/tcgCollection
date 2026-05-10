@@ -61,7 +61,8 @@ async function loadCollections() {
         alert('Erro ao carregar coleções. Verifique se o servidor está rodando.');
     }
 }
-Seleciona uma coleção pelo nome (usado quando vem de URL)
+
+// Seleciona uma coleção pelo nome (usado quando vem de URL)
 function selectCollectionByName(collectionName) {
     console.log('🔍 Buscando coleção:', collectionName);
     const select = document.getElementById('collectionSelect');
