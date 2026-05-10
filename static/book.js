@@ -105,8 +105,7 @@ function changeCollection() {
         hideEmptyState();
     } else {
         // Limpar parâmetro da URL se desselecionar
-        window.history.pushState({}, '', window.location.pathname);EmptyState();
-    } else {
+        window.history.pushState({}, '', window.location.pathname);
         showEmptyState();
     }
 }
