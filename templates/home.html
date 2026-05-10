@@ -94,6 +94,23 @@
             margin-bottom: 20px;
         }
 
+        .menu-card .card-back-icon {
+            width: 120px;
+            height: 168px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-card .card-back-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
         .menu-card h2 {
             font-size: 2em;
             margin-bottom: 15px;
@@ -141,7 +158,9 @@
             </a>
 
             <a href="/manage_cards" class="menu-card cards">
-                <div class="icon">🃏</div>
+                <div class="icon card-back-icon">
+                    <img src="/static/yugioh-card-back.jpg" alt="Gerenciar Cartas">
+                </div>
                 <h2>Gerenciar Cartas</h2>
                 <p>Adicionar e editar cartas</p>
             </a>
