@@ -106,13 +106,20 @@ class TCGImporter:
             existing_card = existing_cards[card_number]
             card_id = existing_card['id']
             
+            # Preparar dados para atualização, preservando image_url se já existir
+            update_data = card_data.copy()
+            
+            # Se a carta já tem image_url e o novo está vazio, manter o existente
+            if existing_card.get('image_url') and not card_data.get('image_url'):
+                update_data['image_url'] = existing_card['image_url']
+            
             try:
-                response = requests.put(f"{self.api_url}/cards/{card_id}", json=card_data)
+                response = requests.put(f"{self.api_url}/cards/{card_id}", json=update_data)
                 response.raise_for_status()
                 self.stats['cards_updated'] += 1
                 
                 # Atualizar cache
-                existing_cards[card_number].update(card_data)
+                existing_cards[card_number].update(update_data)
                 
                 return True, 'updated'
             except requests.exceptions.RequestException as e:
