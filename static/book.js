@@ -161,12 +161,24 @@ function renderCardSlot(slot, card, cardNumber) {
             ? '<span class="orica-text">Orica</span>'
             : '<img src="/static/konami-logo.svg" alt="Konami" class="konami-logo" onerror="this.style.display=\'none\'">';
         
+        // Se não tem imagem, tenta buscar via API
+        let imageUrl = card.image_url;
+        if (!imageUrl || imageUrl === 'None' || imageUrl === '') {
+            // Para cartas Konami, tenta buscar na API YGOPRODeck
+            if (card.tipoOrigem === 'Konami') {
+                imageUrl = `https://images.ygoprodeck.com/images/cards/${card.name.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+            } else {
+                // Para Oricas, usa placeholder customizado
+                imageUrl = 'https://via.placeholder.com/200x280/f5576c/ffffff?text=ORICA';
+            }
+        }
+        
         slot.innerHTML = `
             <div class="card-content">
-                <img src="${card.image_url || 'https://via.placeholder.com/200x280?text=No+Image'}" 
+                <img src="${imageUrl}" 
                      alt="${card.name}" 
                      class="card-image"
-                     onerror="this.src='https://via.placeholder.com/200x280?text=Erro+ao+carregar'">
+                     onerror="this.src='https://via.placeholder.com/200x280?text=${encodeURIComponent(card.name)}'">
                 <div class="card-info">
                     <div class="card-header">
                         ${origemHtml}
