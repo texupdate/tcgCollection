@@ -23,9 +23,11 @@ class TCGImporter:
     def __init__(self, api_url: str = API_BASE_URL):
         self.api_url = api_url
         self.collections_cache: Dict[str, int] = {}
+        self.cards_cache: Dict[int, Dict[int, dict]] = {}  # {collection_id: {card_number: card_data}}
         self.stats = {
             'collections_created': 0,
             'cards_added': 0,
+            'cards_updated': 0,
             'errors': 0
         }
     
@@ -72,25 +74,68 @@ class TCGImporter:
             self.stats['errors'] += 1
             return None
     
-    def add_card(self, collection_id: int, card_data: dict) -> bool:
-        """Adiciona uma carta à coleção."""
+    def get_existing_cards(self, collection_id: int) -> Dict[int, dict]:
+        """Busca todas as cartas existentes de uma coleção."""
+        if collection_id in self.cards_cache:
+            return self.cards_cache[collection_id]
+        
         try:
-            card_data['collection_id'] = collection_id
-            response = requests.post(f"{self.api_url}/cards", json=card_data)
+            response = requests.get(f"{self.api_url}/collections/{collection_id}/cards")
             response.raise_for_status()
-            self.stats['cards_added'] += 1
-            return True
+            cards = response.json()
+            
+            # Indexar por collection_number
+            cards_by_number = {}
+            for card in cards:
+                cards_by_number[card['collection_number']] = card
+            
+            self.cards_cache[collection_id] = cards_by_number
+            return cards_by_number
         except requests.exceptions.RequestException as e:
-            error_msg = str(e)
+            print(f"⚠️  Erro ao buscar cartas existentes: {e}")
+            return {}
+    
+    def add_or_update_card(self, collection_id: int, card_data: dict) -> tuple[bool, str]:
+        """Adiciona uma carta nova ou atualiza uma existente."""
+        card_number = card_data['collection_number']
+        existing_cards = self.get_existing_cards(collection_id)
+        
+        # Verificar se carta já existe
+        if card_number in existing_cards:
+            # ATUALIZAR carta existente
+            existing_card = existing_cards[card_number]
+            card_id = existing_card['id']
+            
             try:
-                if response.status_code == 500:
-                    print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: Número duplicado?")
-                else:
-                    print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: {error_msg}")
-            except:
-                print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: {error_msg}")
-            self.stats['errors'] += 1
-            return False
+                response = requests.put(f"{self.api_url}/cards/{card_id}", json=card_data)
+                response.raise_for_status()
+                self.stats['cards_updated'] += 1
+                
+                # Atualizar cache
+                existing_cards[card_number].update(card_data)
+                
+                return True, 'updated'
+            except requests.exceptions.RequestException as e:
+                print(f"✗ Erro ao atualizar carta #{card_number} - {card_data['name']}: {e}")
+                self.stats['errors'] += 1
+                return False, 'error'
+        else:
+            # ADICIONAR carta nova
+            try:
+                card_data['collection_id'] = collection_id
+                response = requests.post(f"{self.api_url}/cards", json=card_data)
+                response.raise_for_status()
+                new_card = response.json()
+                self.stats['cards_added'] += 1
+                
+                # Atualizar cache
+                existing_cards[card_number] = new_card
+                
+                return True, 'added'
+            except requests.exceptions.RequestException as e:
+                print(f"✗ Erro ao adicionar carta #{card_number} - {card_data['name']}: {e}")
+                self.stats['errors'] += 1
+                return False, 'error'
     
     def import_from_csv(self, csv_file: str, encoding: str = 'utf-8-sig'):
         """Importa cartas de um arquivo CSV."""
@@ -133,8 +178,12 @@ class TCGImporter:
                         
                         # Agrupar por coleção para calcular total_cards
                         collections_data = {}
-                        rows = list(reader)
-                        
+                        rowssuccess, action = self.add_or_update_card(collection_id, card_data)
+                            if success:
+                                if action == 'added':
+                                    print(f"  {origem_icon} [NOVA] Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
+                                elif action == 'updated':
+                                    print(f"  {origem_icon} [ATUALIZADA]
                         print(f"✓ Arquivo lido com encoding: {enc}, delimitador: '{delimiter}'")
                         
                         for row in rows:
@@ -202,7 +251,8 @@ class TCGImporter:
             self.stats['errors'] += 1
         
         # Estatísticas finais
-        print("\n" + "=" * 60)
+        print("\✅ Cartas adicionadas: {self.stats['cards_added']}")
+        print(f"🔄 Cartas atualizadas: {self.stats['cards_updat
         print("📊 RESUMO DA IMPORTAÇÃO")
         print("=" * 60)
         print(f"✓ Coleções criadas: {self.stats['collections_created']}")
