@@ -95,58 +95,98 @@ class TCGImporter:
         print("=" * 60)
         
         try:
-            with open(csv_file, 'r', encoding=encoding) as file:
-                reader = csv.DictReader(file)
-                
-                # Validar cabeçalhos
-                required_fields = ['collection_name', 'card_number', 'card_name']
-                if not all(field in reader.fieldnames for field in required_fields):
-                    print(f"✗ Erro: O CSV deve ter os campos: {', '.join(required_fields)}")
-                    print(f"  Campos encontrados: {', '.join(reader.fieldnames)}")
-                    return
-                
-                # Agrupar por coleção para calcular total_cards
-                collections_data = {}
-                rows = list(reader)
-                
-                for row in rows:
-                    col_name = row['collection_name'].strip()
-                    if col_name not in collections_data:
-                        collections_data[col_name] = []
-                    collections_data[col_name].append(row)
-                
-                # Processar cada coleção
-                for collection_name, cards in collections_data.items():
-                    print(f"\n📚 Processando coleção: {collection_name}")
-                    print("-" * 60)
-                    
-                    # Calcular total de cartas da coleção
-                    max_card_number = max(int(card['card_number']) for card in cards)
-                    
-                    # Criar ou obter coleção
-                    collection_id = self.get_or_create_collection(collection_name, max_card_number)
-                    if not collection_id:
-                        print(f"⚠️  Pulando coleção '{collection_name}' devido a erro")
-                        continue
-                    
-                    # Adicionar cartas
-                    for row in cards:
-                        card_data = {
-                            'collection_number': int(row['card_number']),
-                            'name': row['card_name'].strip(),
-                            'image_url': row.get('image_url', '').strip() or None,
-                            'rarity': row.get('rarity', '').strip() or None,
-                            'quantity': int(row.get('quantity', 0)),
-                            'set_name': row.get('set_name', '').strip() or None,
-                            'card_number': row.get('set_card_number', '').strip() or None,
-                            'condition': row.get('condition', '').strip() or None,
-                            'language': row.get('language', 'Português').strip(),
-                            'notes': row.get('notes', '').strip() or None
-                        }
+            # Tentar diferentes encodings
+            encodings_to_try = [encoding, 'utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+            success = False
+            
+            for enc in encodings_to_try:
+                try:
+                    with open(csv_file, 'r', encoding=enc) as file:
+                        # Detectar delimitador automaticamente
+                        sample = file.read(1024)
+                        file.seek(0)
+                        delimiter = ';' if sample.count(';') > sample.count(',') else ','
+                        reader = csv.DictReader(file, delimiter=delimiter)
                         
-                        if self.add_card(collection_id, card_data):
-                            print(f"  ✓ Carta #{card_data['collection_number']:03d} - {card_data['name']}")
-        
+                        # Validar cabeçalhos (aceitar variações)
+                        fieldnames = [f.strip().lower() for f in reader.fieldnames]
+                        
+                        # Mapear variações de nomes de colunas
+                        field_mapping = {}
+                        for original in reader.fieldnames:
+                            lower = original.strip().lower()
+                            if 'collection' in lower and 'name' in lower:
+                                field_mapping['collection_name'] = original
+                            elif lower in ['card_number', 'r_numr', 'number', 'num']:
+                                field_mapping['card_number'] = original
+                            elif 'card' in lower and 'name' in lower:
+                                field_mapping['card_name'] = original
+                        
+                        required_fields = ['collection_name', 'card_number', 'card_name']
+                        if not all(field in field_mapping for field in required_fields):
+                            print(f"✗ Erro: O CSV deve ter campos equivalentes a: {', '.join(required_fields)}")
+                            print(f"  Campos encontrados: {', '.join(reader.fieldnames)}")
+                            return
+                        
+                        # Agrupar por coleção para calcular total_cards
+                        collections_data = {}
+                        rows = list(reader)
+                        
+                        print(f"✓ Arquivo lido com encoding: {enc}, delimitador: '{delimiter}'")
+                        
+                        for row in rows:
+                            col_name = row[field_mapping['collection_name']].strip()
+                            if col_name not in collections_data:
+                                collections_data[col_name] = []
+                            collections_data[col_name].append(row)
+                    
+                    # Processar cada coleção
+                    for collection_name, cards in collections_data.items():
+                        print(f"\n📚 Processando coleção: {collection_name}")
+                        print("-" * 60)
+                        
+                        # Calcular total de cartas da coleção
+                        max_card_number = max(int(card[field_mapping['card_number']]) for card in cards)
+                        
+                        # Criar ou obter coleção
+                        collection_id = self.get_or_create_collection(collection_name, max_card_number)
+                        if not collection_id:
+                            print(f"⚠️  Pulando coleção '{collection_name}' devido a erro")
+                            continue
+                        
+                        # Adicionar cartas
+                        for row in cards:
+                            card_data = {
+                                'collection_number': int(row[field_mapping['card_number']]),
+                                'name': row[field_mapping['card_name']].strip(),
+                                'image_url': row.get('image_url', '').strip() or None,
+                                'rarity': row.get('rarity', '').strip() or None,
+                                'quantity': int(row.get('quantity', 0)) if row.get('quantity', '').strip() else 0,
+                                'set_name': row.get('set_name', '').strip() or None,
+                                'card_number': row.get('set_card_number', '').strip() or None,
+                                'condition': row.get('condition', '').strip() or None,
+                                'language': row.get('language', 'Português').strip() if row.get('language', '').strip() else 'Português',
+                                'notes': row.get('notes', '').strip() or None
+                            }
+                            
+                            if self.add_card(collection_id, card_data):
+                                print(f"  ✓ Carta #{card_data['collection_number']:03d} - {card_data['name']}")
+                    
+                    # Sucesso - sair do loop de encodings
+                    success = True
+                    break
+                        
+                except UnicodeDecodeError:
+                    if enc == encodings_to_try[-1]:
+                        print(f"✗ Erro: Não foi possível ler o arquivo com nenhum encoding testado")
+                        self.stats['errors'] += 1
+                        return
+                    continue
+            
+            if not success:
+                print(f"✗ Erro ao processar arquivo")
+                self.stats['errors'] += 1
+                
         except FileNotFoundError:
             print(f"✗ Erro: Arquivo '{csv_file}' não encontrado")
             self.stats['errors'] += 1
