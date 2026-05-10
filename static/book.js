@@ -1,4 +1,5 @@
 let currentCollection = null;
+let currentCollectionName = null;
 let currentPage = 0;
 let allCards = [];
 let minCardNumber = 0; // Número mínimo da coleção (0 ou 1)
@@ -9,6 +10,15 @@ const CARDS_PER_PAGE = 18;
 window.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Página carregada, iniciando...');
     loadCollections();
+    
+    // Verificar se tem parâmetro collection na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const collectionParam = urlParams.get('collection');
+    if (collectionParam) {
+        console.log('📦 Parâmetro de coleção detectado:', collectionParam);
+        // Aguardar coleções carregarem e então selecionar
+        setTimeout(() => selectCollectionByName(decodeURIComponent(collectionParam)), 500);
+    }
 });
 
 // Carrega todas as coleções
@@ -36,6 +46,7 @@ async function loadCollections() {
         collections.forEach(collection => {
             const option = document.createElement('option');
             option.value = collection.id;
+            option.dataset.name = collection.name; // Guardar nome no dataset
             option.textContent = `${collection.name} (${collection.total_cards} cartas)`;
             select.appendChild(option);
         });
@@ -50,18 +61,50 @@ async function loadCollections() {
         alert('Erro ao carregar coleções. Verifique se o servidor está rodando.');
     }
 }
+Seleciona uma coleção pelo nome (usado quando vem de URL)
+function selectCollectionByName(collectionName) {
+    console.log('🔍 Buscando coleção:', collectionName);
+    const select = document.getElementById('collectionSelect');
+    
+    // Procurar a option com o nome correspondente
+    const options = select.querySelectorAll('option');
+    for (let option of options) {
+        if (option.dataset.name === collectionName) {
+            select.value = option.value;
+            currentCollectionName = collectionName;
+            changeCollection();
+            console.log('✅ Coleção selecionada:', collectionName);
+            return;
+        }
+    }
+    
+    console.warn('⚠️ Coleção não encontrada:', collectionName);
+}
 
 // Muda a coleção selecionada
 function changeCollection() {
     const select = document.getElementById('collectionSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    
     currentCollection = select.value;
+    currentCollectionName = selectedOption.dataset.name;
     currentPage = 0;
     searchTerm = ''; // Limpar busca ao trocar coleção
     document.getElementById('searchInput').value = '';
     
     if (currentCollection) {
+        // Atualizar URL sem recarregar a página
+        if (currentCollectionName) {
+            const newUrl = `${window.location.pathname}?collection=${encodeURIComponent(currentCollectionName)}`;
+            window.history.pushState({collection: currentCollectionName}, '', newUrl);
+            console.log('🔗 URL atualizada:', newUrl);
+        }
+        
         loadCards();
         hideEmptyState();
+    } else {
+        // Limpar parâmetro da URL se desselecionar
+        window.history.pushState({}, '', window.location.pathname);EmptyState();
     } else {
         showEmptyState();
     }

@@ -19,8 +19,10 @@
 
         <!-- Formulário para criar nova coleção -->
         <div class="card">
-            <h2>➕ Criar Nova Coleção</h2>
-            <form id="collection-form">
+            <h2 onclick="toggleForm()" style="cursor: pointer;">
+                <span id="toggleIcon">➕</span> Criar Nova Coleção
+            </h2>
+            <form id="collection-form" style="display: none;">
                 <div class="form-group">
                     <label for="collection-name">Nome da Coleção:</label>
                     <input type="text" id="collection-name" required placeholder="Ex: Yu-Gi-Oh! LOB">
@@ -45,6 +47,20 @@
     </div>
 
     <script>
+        // Toggle do formulário
+        function toggleForm() {
+            const form = document.getElementById('collection-form');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                icon.textContent = '➖';
+            } else {
+                form.style.display = 'none';
+                icon.textContent = '➕';
+            }
+        }
+
         // Carregar coleções ao iniciar
         loadCollections();
 
@@ -82,7 +98,7 @@
         async function loadCollections() {
             try {
                 const response = await fetch('/api/collections');
-                const collections = await response.json();
+                const collections = await response.json();'${encodeURIComponent(col.name)
                 
                 const container = document.getElementById('collections-list');
                 
@@ -119,8 +135,8 @@
         }
 
         // Ver cartas da coleção
-        function viewCollection(id, name) {
-            window.location.href = `/viewer?collection=${id}`;
+        function viewCollection(collectionName) {
+            window.location.href = `/viewer?collection=${collectionName}`;
         }
 
         // Editar coleção

@@ -53,8 +53,14 @@ def get_collections():
 
 @app.route('/api/collections/<int:collection_id>', methods=['GET'])
 def get_collection(collection_id):
-    """Retorna uma coleção específica"""
+    """Retorna uma coleção específica por ID"""
     collection = Collection.query.get_or_404(collection_id)
+    return jsonify(collection.to_dict())
+
+@app.route('/api/collections/by-name/<collection_name>', methods=['GET'])
+def get_collection_by_name(collection_name):
+    """Retorna uma coleção específica por nome"""
+    collection = Collection.query.filter_by(name=collection_name).first_or_404()
     return jsonify(collection.to_dict())
 
 @app.route('/api/collections', methods=['POST'])
