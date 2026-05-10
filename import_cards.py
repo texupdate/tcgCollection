@@ -164,6 +164,7 @@ class TCGImporter:
                                 'name': row[field_mapping['card_name']].strip(),
                                 'image_url': row.get('image_url', '').strip() or None,
                                 'rarity': row.get('rarity', '').strip() or None,
+                                'tipoOrigem': row.get('tipoOrigem', 'Konami').strip() or 'Konami',  # 'Konami' ou 'Orica'
                                 'quantity': int(row.get('quantity', 0)) if row.get('quantity', '').strip() else 0,
                                 'set_name': row.get('set_name', '').strip() or None,
                                 'card_number': row.get('set_card_number', '').strip() or None,
@@ -172,8 +173,11 @@ class TCGImporter:
                                 'notes': row.get('notes', '').strip() or None
                             }
                             
+                            # Indicador visual para Oricas
+                            origem_icon = "🎨" if card_data['tipoOrigem'] == 'Orica' else "✨"
+                            
                             if self.add_card(collection_id, card_data):
-                                print(f"  ✓ Carta #{card_data['collection_number']:03d} - {card_data['name']}")
+                                print(f"  {origem_icon} Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
                     
                     # Sucesso - sair do loop de encodings
                     success = True
@@ -211,12 +215,13 @@ def main():
     if len(sys.argv) < 2:
         print("Uso: python import_cards.py <arquivo.csv>")
         print("\nFormato do CSV:")
-        print("collection_name,card_number,card_name,image_url,rarity,quantity")
+        print("collection_name,card_number,card_name,tipoOrigem,image_url,rarity,quantity")
         print("\nCampos obrigatórios:")
         print("  - collection_name: Nome da coleção")
         print("  - card_number: Número da carta na coleção (1, 2, 3...)")
         print("  - card_name: Nome da carta")
         print("\nCampos opcionais:")
+        print("  - tipoOrigem: 'Konami' ou 'Orica' (padrão: Konami)")
         print("  - image_url: URL da imagem da carta")
         print("  - rarity: Raridade (Common, Rare, etc)")
         print("  - quantity: Quantidade inicial (padrão: 0)")

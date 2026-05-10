@@ -1,0 +1,4 @@
+collection_name;card_number;card_name;tipoOrigem;image_url;rarity;quantity;set_name;condition;language;notes
+Orica Yu-Gi-Oh;1;Dark Magician Girl Custom;Orica;https://example.com/orica-dmg.jpg;Custom;1;ORICA-001;Near Mint;Português;Arte customizada por artista
+Orica Yu-Gi-Oh;2;Blue-Eyes White Dragon Alt Art;Orica;https://example.com/orica-bewd.jpg;Custom;1;ORICA-002;Mint;Português;Arte alternativa oficial
+Orica Yu-Gi-Oh;3;Red-Eyes Black Dragon Alternate;Orica;https://example.com/orica-rebd.jpg;Custom;2;ORICA-003;Near Mint;Português;Proxy para jogo casual
