@@ -3,104 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCG Collection Manager</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>TCG Collection - Visualização de Livro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='book.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🃏 TCG Collection Manager</h1>
-            <p>Gerencie sua coleção de cartas</p>
-        </header>
-
-        <div class="stats-section" id="stats">
-            <div class="stat-card">
-                <h3>Total de Cartas</h3>
-                <p class="stat-value" id="totalCards">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Cartas Únicas</h3>
-                <p class="stat-value" id="uniqueCards">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Valor Total</h3>
-                <p class="stat-value" id="totalValue">R$ 0,00</p>
-            </div>
+    <div class="header">
+        <h1>🃏 Minha Coleção TCG</h1>
+        <div class="controls">
+            <select id="collectionSelect" onchange="changeCollection()">
+                <option value="">Selecione uma coleção...</option>
+            </select>
+            <a href="/manage" class="btn btn-manage">⚙️ Gerenciar Coleção</a>
         </div>
+    </div>
 
-        <div class="actions">
-            <button class="btn btn-primary" onclick="showAddCardForm()">➕ Adicionar Carta</button>
-            <button class="btn btn-secondary" onclick="loadCards()">🔄 Atualizar</button>
-        </div>
+    <div class="book-container" id="bookContainer">
+        <div class="book">
+            <!-- Página Esquerda (cartas 1-9) -->
+            <div class="page left-page">
+                <div class="page-header">
+                    <span class="page-number" id="leftPageNumber">Página 1</span>
+                </div>
+                <div class="cards-grid">
+                    <div class="card-slot" data-slot="1"></div>
+                    <div class="card-slot" data-slot="2"></div>
+                    <div class="card-slot" data-slot="3"></div>
+                    <div class="card-slot" data-slot="4"></div>
+                    <div class="card-slot" data-slot="5"></div>
+                    <div class="card-slot" data-slot="6"></div>
+                    <div class="card-slot" data-slot="7"></div>
+                    <div class="card-slot" data-slot="8"></div>
+                    <div class="card-slot" data-slot="9"></div>
+                </div>
+            </div>
 
-        <div id="addCardForm" class="card-form" style="display: none;">
-            <h2>Adicionar Nova Carta</h2>
-            <form id="cardForm">
-                <div class="form-group">
-                    <label for="name">Nome da Carta *</label>
-                    <input type="text" id="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="set_name">Nome do Set</label>
-                    <input type="text" id="set_name">
-                </div>
-                <div class="form-group">
-                    <label for="card_number">Número da Carta</label>
-                    <input type="text" id="card_number">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="rarity">Raridade</label>
-                        <select id="rarity">
-                            <option value="">Selecione...</option>
-                            <option value="Common">Comum</option>
-                            <option value="Uncommon">Incomum</option>
-                            <option value="Rare">Rara</option>
-                            <option value="Super Rare">Super Rara</option>
-                            <option value="Ultra Rare">Ultra Rara</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Quantidade</label>
-                        <input type="number" id="quantity" value="1" min="1">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="condition">Condição</label>
-                        <select id="condition">
-                            <option value="">Selecione...</option>
-                            <option value="Mint">Mint</option>
-                            <option value="Near Mint">Near Mint</option>
-                            <option value="Excellent">Excelente</option>
-                            <option value="Good">Bom</option>
-                            <option value="Played">Jogado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="language">Idioma</label>
-                        <input type="text" id="language" value="Português">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notas</label>
-                    <textarea id="notes" rows="3"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                    <button type="button" class="btn btn-secondary" onclick="hideAddCardForm()">Cancelar</button>
-                </div>
-            </form>
-        </div>
+            <!-- Divisor do Livro -->
+            <div class="book-spine"></div>
 
-        <div class="cards-section">
-            <h2>Sua Coleção</h2>
-            <div id="cardsList" class="cards-list">
-                <p class="empty-state">Nenhuma carta cadastrada ainda. Clique em "Adicionar Carta" para começar!</p>
+            <!-- Página Direita (cartas 10-18) -->
+            <div class="page right-page">
+                <div class="page-header">
+                    <span class="page-number" id="rightPageNumber">Página 2</span>
+                </div>
+                <div class="cards-grid">
+                    <div class="card-slot" data-slot="10"></div>
+                    <div class="card-slot" data-slot="11"></div>
+                    <div class="card-slot" data-slot="12"></div>
+                    <div class="card-slot" data-slot="13"></div>
+                    <div class="card-slot" data-slot="14"></div>
+                    <div class="card-slot" data-slot="15"></div>
+                    <div class="card-slot" data-slot="16"></div>
+                    <div class="card-slot" data-slot="17"></div>
+                    <div class="card-slot" data-slot="18"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div class="navigation">
+        <button id="prevBtn" onclick="previousPage()" class="nav-btn">⬅️ Página Anterior</button>
+        <span class="page-info" id="pageInfo">Cartas 1-18 de 0</span>
+        <button id="nextBtn" onclick="nextPage()" class="nav-btn">Próxima Página ➡️</button>
+    </div>
+
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <h2>📚 Nenhuma coleção selecionada</h2>
+        <p>Selecione uma coleção acima ou <a href="/manage">crie uma nova coleção</a> para começar!</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='book.js') }}"></script>
 </body>
 </html>

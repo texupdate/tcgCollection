@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCG Collection - Gerenciamento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Gerenciar Coleção</h1>
+            <p><a href="/">⬅️ Voltar para Visualização</a></p>
+        </header>
+
+        <!-- Gerenciar Coleções -->
+        <div class="section">
+            <h2>📚 Coleções</h2>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="showAddCollectionForm()">➕ Nova Coleção</button>
+            </div>
+
+            <div id="addCollectionForm" class="card-form" style="display: none;">
+                <h3>Adicionar Nova Coleção</h3>
+                <form id="collectionForm">
+                    <div class="form-group">
+                        <label for="collection_name">Nome da Coleção *</label>
+                        <input type="text" id="collection_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="collection_desc">Descrição</label>
+                        <textarea id="collection_desc" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="collection_total">Total de Cartas na Coleção</label>
+                        <input type="number" id="collection_total" value="0" min="0">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddCollectionForm()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="collectionsList" class="collections-list"></div>
+        </div>
+
+        <!-- Gerenciar Cartas -->
+        <div class="section">
+            <h2>🃏 Cartas</h2>
+            <div class="actions">
+                <select id="filterCollection" onchange="filterCardsByCollection()">
+                    <option value="">Todas as coleções</option>
+                </select>
+                <button class="btn btn-primary" onclick="showAddCardForm()">➕ Nova Carta</button>
+            </div>
+
+            <div id="addCardForm" class="card-form" style="display: none;">
+                <h3>Adicionar Nova Carta</h3>
+                <form id="cardForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="card_collection">Coleção *</label>
+                            <select id="card_collection" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="collection_number">Número na Coleção *</label>
+                            <input type="number" id="collection_number" required min="1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Nome da Carta *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image_url">URL da Imagem *</label>
+                        <input type="url" id="image_url" placeholder="https://exemplo.com/imagem.jpg" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="set_name">Nome do Set</label>
+                            <input type="text" id="set_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="card_number">Número da Carta no Set</label>
+                            <input type="text" id="card_number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rarity">Raridade</label>
+                            <select id="rarity">
+                                <option value="">Selecione...</option>
+                                <option value="Common">Comum</option>
+                                <option value="Uncommon">Incomum</option>
+                                <option value="Rare">Rara</option>
+                                <option value="Super Rare">Super Rara</option>
+                                <option value="Ultra Rare">Ultra Rara</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantidade Inicial</label>
+                            <input type="number" id="quantity" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="condition">Condição</label>
+                            <select id="condition">
+                                <option value="">Selecione...</option>
+                                <option value="Mint">Mint</option>
+                                <option value="Near Mint">Near Mint</option>
+                                <option value="Excellent">Excelente</option>
+                                <option value="Good">Bom</option>
+                                <option value="Played">Jogado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="language">Idioma</label>
+                            <input type="text" id="language" value="Português">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notas</label>
+                        <textarea id="notes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddCardForm()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="cardsList" class="cards-list"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='manage.js') }}"></script>
+</body>
+</html>

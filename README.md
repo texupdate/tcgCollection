@@ -1,14 +1,32 @@
 # TCG Collection Manager
 
-Sistema de gerenciamento de coleção de cartas TCG (Trading Card Game) com servidor local.
+Sistema de gerenciamento de coleção de cartas TCG (Trading Card Game) com visualização em formato de livro aberto.
 
 ## 📋 Descrição
 
-Aplicação web localhost para gerenciar sua coleção de cartas TCG, permitindo:
-- Cadastro e organização de cartas
-- Controle de inventário
-- Busca e filtros
-- Estatísticas da coleção
+Aplicação web localhost para gerenciar sua coleção de cartas TCG com visualização interativa em formato de livro, permitindo:
+- 📚 Múltiplas coleções com numeração própria
+- 📖 Visualização em formato de livro aberto (18 cartas por página)
+- ➕➖ Controle de estoque com botões + e - 
+- 🖼️ Imagens das cartas via URL
+- 📊 Efeito visual para cartas com quantidade zero
+- 🔍 Busca e filtros
+- 📈 Estatísticas da coleção
+
+## ✨ Funcionalidades Principais
+
+### Visualização de Livro
+- Layout em formato de livro aberto
+- Página esquerda: cartas 1-9
+- Página direita: cartas 10-18
+- Navegação entre páginas
+- Transparência cinza para cartas com quantidade 0
+
+### Gerenciamento
+- Criar múltiplas coleções
+- Cadastrar cartas com número específico por coleção
+- Incrementar/decrementar quantidade diretamente no livro
+- Editar e remover cartas e coleções
 
 ## 🛠️ Tecnologias
 
