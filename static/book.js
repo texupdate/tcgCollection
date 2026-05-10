@@ -65,17 +65,17 @@ function renderCurrentPage() {
     const startIndex = currentPage * CARDS_PER_PAGE;
     const endIndex = startIndex + CARDS_PER_PAGE;
     
-    // Obter todas as cartas da página atual
+    // Obter todas as cartas da página atual (começando do 0)
     const pageCards = [];
-    for (let i = startIndex + 1; i <= endIndex; i++) {
+    for (let i = startIndex; i < endIndex; i++) {
         const card = allCards.find(c => c.collection_number === i);
         pageCards.push(card || null);
     }
     
-    // Renderizar cartas nos slots (1-9 esquerda, 10-18 direita)
+    // Renderizar cartas nos slots (0-8 esquerda, 9-17 direita)
     for (let i = 0; i < CARDS_PER_PAGE; i++) {
         const slotNumber = i + 1;
-        const cardNumber = startIndex + i + 1;
+        const cardNumber = startIndex + i;
         const card = pageCards[i];
         
         const slot = document.querySelector(`.card-slot[data-slot="${slotNumber}"]`);
@@ -205,8 +205,8 @@ function updatePagination() {
     const totalCards = getTotalCardsInCollection();
     const totalPages = Math.ceil(totalCards / CARDS_PER_PAGE);
     
-    const startCard = currentPage * CARDS_PER_PAGE + 1;
-    const endCard = Math.min((currentPage + 1) * CARDS_PER_PAGE, totalCards);
+    const startCard = currentPage * CARDS_PER_PAGE;
+    const endCard = Math.min((currentPage + 1) * CARDS_PER_PAGE - 1, totalCards - 1);
     
     document.getElementById('pageInfo').textContent = 
         `Cartas ${startCard}-${endCard} de ${totalCards}`;

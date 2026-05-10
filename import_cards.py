@@ -82,9 +82,12 @@ class TCGImporter:
             return True
         except requests.exceptions.RequestException as e:
             error_msg = str(e)
-            if response.status_code == 500:
-                print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: Número duplicado?")
-            else:
+            try:
+                if response.status_code == 500:
+                    print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: Número duplicado?")
+                else:
+                    print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: {error_msg}")
+            except:
                 print(f"✗ Erro ao adicionar carta #{card_data['collection_number']} - {card_data['name']}: {error_msg}")
             self.stats['errors'] += 1
             return False
