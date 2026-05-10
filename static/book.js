@@ -2,6 +2,7 @@ let currentCollection = null;
 let currentPage = 0;
 let allCards = [];
 let minCardNumber = 0; // Número mínimo da coleção (0 ou 1)
+let currentFilter = 'all'; // all, original, orica
 const CARDS_PER_PAGE = 18;
 
 // Carrega as coleções ao iniciar
@@ -38,6 +39,15 @@ function changeCollection() {
     const select = document.getElementById('collectionSelect');
     currentCollection = select.value;
     currentPage = 0;
+    currentFilter = 'all'; // Reset filter ao trocar coleção
+    
+    // Reset active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        }
+    });
     
     if (currentCollection) {
         loadCards();
@@ -47,11 +57,35 @@ function changeCollection() {
     }
 }
 
-// Carrega as cartas da coleção
-async function loadCards() {
-    if (!currentCollection) return;
+// Define o filtro de tipo de carta
+function setFilter(filter) {
+    currentFilter = filter;
+    currentPage = 0;
     
-    try {
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === filter) {
+            btn.classList.add('active');
+        }
+    });
+    
+    renderCurrentPage();
+}// Filtrar cartas baseado no filtro atual
+    let filteredCards = allCards;
+    if (currentFilter === 'original') {
+        filteredCards = allCards.filter(c => !c.is_orica);
+    } else if (currentFilter === 'orica') {
+        filteredCards = allCards.filter(c => c.is_orica);
+    }
+    
+    const startCardNumber = minCardNumber + (currentPage * CARDS_PER_PAGE);
+    const endCardNumber = startCardNumber + CARDS_PER_PAGE;
+    
+    // Obter todas as cartas da página atual
+    const pageCards = [];
+    for (let i = startCardNumber; i < endCardNumber; i++) {
+        const card = filtered
         const response = await fetch(`/api/collections/${currentCollection}/cards`);
         allCards = await response.json();
         
@@ -98,8 +132,12 @@ function renderCurrentPage() {
 function renderCardSlot(slot, card, cardNumber) {
     slot.innerHTML = '';
     slot.className = 'card-slot';
-    
-    if (card) {
+    // Badge para Orica
+        const oricaBadge = card.is_orica ? '<div class="orica-badge">ORICA</div>' : '';
+        
+        slot.innerHTML = `
+            <div class="card-content">
+                ${oricaBadge}
         // Carta existe
         const isZero = card.quantity === 0;
         if (isZero) {

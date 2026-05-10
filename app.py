@@ -117,6 +117,7 @@ def add_card():
         card_number=data.get('card_number'),
         rarity=data.get('rarity'),
         card_type=data.get('card_type'),
+        is_orica=data.get('is_orica', False),
         quantity=data.get('quantity', 0),
         condition=data.get('condition'),
         language=data.get('language', 'Português'),
@@ -143,6 +144,7 @@ def update_card(card_id):
     card.card_number = data.get('card_number', card.card_number)
     card.rarity = data.get('rarity', card.rarity)
     card.card_type = data.get('card_type', card.card_type)
+    card.is_orica = data.get('is_orica', card.is_orica)
     card.quantity = data.get('quantity', card.quantity)
     card.condition = data.get('condition', card.condition)
     card.language = data.get('language', card.language)

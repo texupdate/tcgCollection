@@ -15,6 +15,11 @@
             </select>
             <a href="/manage" class="btn btn-manage">⚙️ Gerenciar Coleção</a>
         </div>
+        <div class="filter-controls">
+            <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">📋 Todas</button>
+            <button class="filter-btn" data-filter="original" onclick="setFilter('original')">✨ Originais</button>
+            <button class="filter-btn" data-filter="orica" onclick="setFilter('orica')">🎨 Oricas</button>
+        </div>
     </div>
 
     <div class="book-container" id="bookContainer">

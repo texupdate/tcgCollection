@@ -42,6 +42,7 @@ class Card(db.Model):
     card_number = db.Column(db.String(50))
     rarity = db.Column(db.String(50))
     card_type = db.Column(db.String(50))
+    is_orica = db.Column(db.Boolean, default=False)  # True = Orica/Custom, False = Original
     quantity = db.Column(db.Integer, default=0)
     condition = db.Column(db.String(50))
     language = db.Column(db.String(50), default='Português')
@@ -66,6 +67,7 @@ class Card(db.Model):
             'card_number': self.card_number,
             'rarity': self.rarity,
             'card_type': self.card_type,
+            'is_orica': self.is_orica,
             'quantity': self.quantity,
             'condition': self.condition,
             'language': self.language,
