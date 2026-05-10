@@ -178,12 +178,8 @@ class TCGImporter:
                         
                         # Agrupar por coleção para calcular total_cards
                         collections_data = {}
-                        rowssuccess, action = self.add_or_update_card(collection_id, card_data)
-                            if success:
-                                if action == 'added':
-                                    print(f"  {origem_icon} [NOVA] Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
-                                elif action == 'updated':
-                                    print(f"  {origem_icon} [ATUALIZADA]
+                        rows = list(reader)
+                        
                         print(f"✓ Arquivo lido com encoding: {enc}, delimitador: '{delimiter}'")
                         
                         for row in rows:
@@ -225,8 +221,12 @@ class TCGImporter:
                             # Indicador visual para Oricas
                             origem_icon = "🎨" if card_data['tipoOrigem'] == 'Orica' else "✨"
                             
-                            if self.add_card(collection_id, card_data):
-                                print(f"  {origem_icon} Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
+                            success, action = self.add_or_update_card(collection_id, card_data)
+                            if success:
+                                if action == 'added':
+                                    print(f"  {origem_icon} [NOVA] Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
+                                elif action == 'updated':
+                                    print(f"  {origem_icon} [ATUALIZADA] Carta #{card_data['collection_number']:03d} - {card_data['name']} [{card_data['tipoOrigem']}]")
                     
                     # Sucesso - sair do loop de encodings
                     success = True
@@ -251,13 +251,14 @@ class TCGImporter:
             self.stats['errors'] += 1
         
         # Estatísticas finais
-        print("\✅ Cartas adicionadas: {self.stats['cards_added']}")
-        print(f"🔄 Cartas atualizadas: {self.stats['cards_updat
+        print("\n" + "=" * 60)
         print("📊 RESUMO DA IMPORTAÇÃO")
         print("=" * 60)
         print(f"✓ Coleções criadas: {self.stats['collections_created']}")
-        print(f"✓ Cartas adicionadas: {self.stats['cards_added']}")
+        print(f"✅ Cartas adicionadas: {self.stats['cards_added']}")
+        print(f"🔄 Cartas atualizadas: {self.stats['cards_updated']}")
         print(f"✗ Erros: {self.stats['errors']}")
+        print("=" * 60)
         print("=" * 60)
 
 

@@ -20,13 +20,28 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    """Página inicial - visualização de livro"""
+    """Página inicial - menu principal"""
+    return render_template('home.html')
+
+@app.route('/viewer')
+def viewer():
+    """Página de visualização - álbum de cartas"""
     return render_template('index.html')
 
 @app.route('/manage')
 def manage():
-    """Página de gerenciamento de cartas"""
+    """Redireciona para gerenciar coleções (compatibilidade)"""
     return render_template('manage.html')
+
+@app.route('/manage_collections')
+def manage_collections():
+    """Página de gerenciamento de pastas/coleções"""
+    return render_template('manage_collections.html')
+
+@app.route('/manage_cards')
+def manage_cards():
+    """Página de gerenciamento de cartas"""
+    return render_template('manage_cards.html')
 
 # ============= COLLECTIONS ENDPOINTS =============
 
@@ -94,9 +109,36 @@ def get_collection_cards(collection_id):
 
 @app.route('/api/cards', methods=['GET'])
 def get_cards():
-    """Retorna todas as cartas"""
-    cards = Card.query.all()
-    return jsonify([card.to_dict() for card in cards])
+    """Retorna cartas com filtros opcionais"""
+    collection_id = request.args.get('collection_id', type=int)
+    search = request.args.get('search', type=str)
+    tipoOrigem = request.args.get('tipoOrigem', type=str)
+    
+    query = Card.query
+    
+    # Filtrar por coleção
+    if collection_id:
+        query = query.filter_by(collection_id=collection_id)
+    
+    # Filtrar por nome (busca parcial)
+    if search:
+        query = query.filter(Card.name.ilike(f'%{search}%'))
+    
+    # Filtrar por tipo de origem
+    if tipoOrigem:
+        query = query.filter_by(tipoOrigem=tipoOrigem)
+    
+    cards = query.order_by(Card.collection_id, Card.collection_number).all()
+    
+    # Adicionar nome da coleção a cada carta
+    result = []
+    for card in cards:
+        card_dict = card.to_dict()
+        if card.collection:
+            card_dict['collection_name'] = card.collection.name
+        result.append(card_dict)
+    
+    return jsonify(result)
 
 @app.route('/api/cards/<int:card_id>', methods=['GET'])
 def get_card(card_id):

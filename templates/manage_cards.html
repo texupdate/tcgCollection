@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Cartas - TCG Collection</title>
+    <link rel="stylesheet" href="/static/manage.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🃏 Gerenciar Cartas</h1>
+            <div class="nav-buttons">
+                <a href="/" class="btn btn-secondary">← Voltar ao Início</a>
+                <a href="/viewer" class="btn btn-secondary">📖 Visualizar Álbum</a>
+                <a href="/manage_collections" class="btn btn-secondary">📁 Gerenciar Pastas</a>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card">
+            <h2>🔍 Filtros</h2>
+            <div class="filters">
+                <div class="form-group">
+                    <label for="filter-collection">Coleção:</label>
+                    <select id="filter-collection">
+                        <option value="">Todas as coleções</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-search">Buscar carta:</label>
+                    <input type="text" id="filter-search" placeholder="Digite o nome da carta...">
+                </div>
+                <div class="form-group">
+                    <label for="filter-tipo">Tipo:</label>
+                    <select id="filter-tipo">
+                        <option value="">Todos</option>
+                        <option value="Konami">Konami (Oficial)</option>
+                        <option value="Orica">Orica (Custom)</option>
+                    </select>
+                </div>
+                <button onclick="loadCards()" class="btn btn-primary">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Lista de cartas -->
+        <div class="card">
+            <div class="cards-header">
+                <h2>📋 Cartas</h2>
+                <button onclick="showAddCardForm()" class="btn btn-primary">➕ Adicionar Carta</button>
+            </div>
+            
+            <div id="cards-list" class="cards-table"></div>
+            
+            <!-- Paginação -->
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const cardsPerPage = 50;
+        let totalCards = 0;
+
+        // Carregar coleções no filtro
+        async function loadCollections() {
+            try {
+                const response = await fetch('/api/collections');
+                const collections = await response.json();
+                
+                const select = document.getElementById('filter-collection');
+                collections.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col.id;
+                    option.textContent = col.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar coleções:', error);
+            }
+        }
+
+        // Carregar cartas com paginação
+        async function loadCards(page = 1) {
+            currentPage = page;
+            const collectionId = document.getElementById('filter-collection').value;
+            const search = document.getElementById('filter-search').value;
+            const tipo = document.getElementById('filter-tipo').value;
+
+            try {
+                // Construir URL com filtros
+                let url = '/api/cards?';
+                if (collectionId) url += `collection_id=${collectionId}&`;
+                if (search) url += `search=${encodeURIComponent(search)}&`;
+                if (tipo) url += `tipoOrigem=${tipo}&`;
+
+                const response = await fetch(url);
+                const allCards = await response.json();
+
+                // Aplicar paginação no cliente
+                totalCards = allCards.length;
+                const start = (currentPage - 1) * cardsPerPage;
+                const end = start + cardsPerPage;
+                const cards = allCards.slice(start, end);
+
+                displayCards(cards);
+                displayPagination();
+            } catch (error) {
+                console.error('Erro ao carregar cartas:', error);
+                document.getElementById('cards-list').innerHTML = 
+                    '<p class="empty-message">Erro ao carregar cartas</p>';
+            }
+        }
+
+        // Exibir cartas
+        function displayCards(cards) {
+            const container = document.getElementById('cards-list');
+            
+            if (cards.length === 0) {
+                container.innerHTML = '<p class="empty-message">Nenhuma carta encontrada</p>';
+                return;
+            }
+
+            const table = `
+                <table class="cards-table-elem">
+                    <thead>
+                        <tr>
+                            <th>Coleção</th>
+                            <th>#</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                            <th>Raridade</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${cards.map(card => `
+                            <tr>
+                                <td>${card.collection_name || 'N/A'}</td>
+                                <td>#${String(card.collection_number).padStart(3, '0')}</td>
+                                <td>
+                                    <div class="card-name-cell">
+                                        ${card.image_url ? `<img src="${card.image_url}" alt="${card.name}" class="card-thumbnail">` : ''}
+                                        <span>${card.name}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    ${card.tipoOrigem === 'Orica' ? 
+                                        '<span class="badge badge-orica">🎨 ORICA</span>' : 
+                                        '<span class="badge badge-konami">✨ KONAMI</span>'}
+                                </td>
+                                <td><span class="quantity-badge">${card.quantity}</span></td>
+                                <td>${card.rarity || '-'}</td>
+                                <td class="actions-cell">
+                                    <button onclick="editCard(${card.id})" class="btn-sm btn-edit">✏️</button>
+                                    <button onclick="deleteCard(${card.id}, '${card.name}')" class="btn-sm btn-delete">🗑️</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
+        }
+
+        // Exibir paginação
+        function displayPagination() {
+            const totalPages = Math.ceil(totalCards / cardsPerPage);
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="pagination-buttons">';
+            
+            // Botão anterior
+            if (currentPage > 1) {
+                html += `<button onclick="loadCards(${currentPage - 1})" class="btn-pagination">← Anterior</button>`;
+            }
+
+            // Números de página
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                html += `<button onclick="loadCards(1)" class="btn-pagination">1</button>`;
+                if (startPage > 2) html += '<span class="pagination-dots">...</span>';
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button onclick="loadCards(${i})" class="btn-pagination ${i === currentPage ? 'active' : ''}">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += '<span class="pagination-dots">...</span>';
+                html += `<button onclick="loadCards(${totalPages})" class="btn-pagination">${totalPages}</button>`;
+            }
+
+            // Botão próximo
+            if (currentPage < totalPages) {
+                html += `<button onclick="loadCards(${currentPage + 1})" class="btn-pagination">Próximo →</button>`;
+            }
+
+            html += '</div>';
+            html += `<p class="pagination-info">Mostrando ${(currentPage - 1) * cardsPerPage + 1}-${Math.min(currentPage * cardsPerPage, totalCards)} de ${totalCards} cartas</p>`;
+
+            container.innerHTML = html;
+        }
+
+        // Adicionar carta
+        function showAddCardForm() {
+            alert('Funcionalidade de adicionar carta em desenvolvimento.\nPor enquanto, use o CSV import ou a API diretamente.');
+        }
+
+        // Editar carta
+        function editCard(id) {
+            alert('Funcionalidade de edição em desenvolvimento');
+        }
+
+        // Deletar carta
+        async function deleteCard(id, name) {
+            if (!confirm(`Tem certeza que deseja deletar a carta "${name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/cards/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Carta deletada com sucesso!');
+                    loadCards(currentPage);
+                } else {
+                    alert('Erro ao deletar carta');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao deletar carta');
+            }
+        }
+
+        // Inicializar
+        loadCollections();
+        loadCards();
+    </script>
+
+    <style>
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .cards-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cards-table-elem {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .cards-table-elem th,
+        .cards-table-elem td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cards-table-elem th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cards-table-elem tr:hover {
+            background: #f8f9fa;
+        }
+
+        .card-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-thumbnail {
+            width: 40px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .badge-orica {
+            background: #f5576c;
+            color: white;
+        }
+
+        .badge-konami {
+            background: #4facfe;
+            color: white;
+        }
+
+        .quantity-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+
+        .btn-sm.btn-edit {
+            background: #4facfe;
+            color: white;
+        }
+
+        .btn-sm.btn-delete {
+            background: #f5576c;
+            color: white;
+        }
+
+        .pagination {
+            margin-top: 30px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .btn-pagination {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-pagination:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-pagination.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination-dots {
+            padding: 0 8px;
+            color: #999;
+        }
+
+        .pagination-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .cards-table-elem {
+                font-size: 0.85em;
+            }
+
+            .card-thumbnail {
+                width: 30px;
+                height: 42px;
+            }
+        }
+    </style>
+</body>
+</html>
