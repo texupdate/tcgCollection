@@ -567,7 +567,7 @@ function updatePagination() {
     }
     
     document.getElementById('pageInfo').textContent = 
-        `Cartas ${startCard}-${endCard} de ${maxCardNumber}`;
+        `Cartas ${startCard}-${endCard} de ${maxCardNumber} | Página ${currentPage + 1}/${totalPages}`;
     
     // Habilitar/desabilitar botões
     document.getElementById('prevBtn').disabled = currentPage === 0;
