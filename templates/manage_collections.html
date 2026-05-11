@@ -231,35 +231,40 @@
             const collection = allCollections.find(c => c.id === id);
             if (!collection) return;
             
-            const newName = prompt('Nome da Coleção:', collection.name);
-            if (newName === null) return;
+            // Mostrar informações atuais antes de editar
+            const confirmEdit = confirm(`Editar coleção "${collection.name}"?\n\nVocê será solicitado a fornecer:\n1. Nome da coleção\n2. Descrição\n3. Total de cartas`);
+            if (!confirmEdit) return;
             
-            const newDescription = prompt('Descrição da Coleção:', collection.description || '');
-            if (newDescription === null) return;
+            const newName = prompt('1️⃣ NOME da Coleção:', collection.name);
+            if (newName === null) return; // Cancelou
             
-            const newTotal = prompt('Total de Cartas:', collection.total_cards);
-            if (newTotal === null) return;
+            const newDescription = prompt('2️⃣ DESCRIÇÃO da Coleção:', collection.description || '');
+            if (newDescription === null) return; // Cancelou
+            
+            const newTotal = prompt('3️⃣ TOTAL de Cartas:', collection.total_cards);
+            if (newTotal === null) return; // Cancelou
             
             try {
                 const response = await fetch(`/api/collections/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        name: newName,
-                        description: newDescription,
+                        name: newName.trim(),
+                        description: newDescription.trim(),
                         total_cards: parseInt(newTotal)
                     })
                 });
                 
                 if (response.ok) {
-                    alert('Coleção atualizada com sucesso!');
+                    alert('✅ Coleção atualizada com sucesso!');
                     loadCollections();
                 } else {
-                    alert('Erro ao atualizar coleção');
+                    const error = await response.json();
+                    alert('❌ Erro ao atualizar coleção: ' + (error.message || 'Erro desconhecido'));
                 }
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao atualizar coleção');
+                alert('❌ Erro ao atualizar coleção');
             }
         }
 
