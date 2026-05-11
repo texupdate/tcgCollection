@@ -48,10 +48,44 @@
 
     <div class="book-container" id="bookContainer">
         <div class="book">
-            <!-- Página Esquerda (cartas 1-9) -->
-            <div class="page left-page">
+            <!-- Primeira Folha - Página Esquerda: Estatísticas e Anotações -->
+            <div class="page left-page stats-page" id="statsPage">
                 <div class="page-header">
-                    <span class="page-number" id="leftPageNumber">Página 1</span>
+                    <span class="page-number">📊 Informações</span>
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="stats-content">
+                    <h3>Estatísticas da Coleção</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">📦 Total de Cartas:</span>
+                        <span class="stat-value" id="totalCardsStats">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">✅ Cartas que Possuo:</span>
+                        <span class="stat-value" id="ownedCardsStats">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">📈 Completude:</span>
+                        <span class="stat-value stat-highlight" id="completionRateStats">0%</span>
+                    </div>
+                </div>
+                
+                <!-- Anotações -->
+                <div class="notes-content">
+                    <h3>✍️ Anotações</h3>
+                    <textarea id="collectionNotes" placeholder="Escreva suas anotações sobre esta coleção..."></textarea>
+                    <button class="btn-save-notes" onclick="saveNotes()">💾 Salvar Anotações</button>
+                </div>
+            </div>
+
+            <!-- Divisor do Livro -->
+            <div class="book-spine"></div>
+
+            <!-- Primeira Folha - Página Direita: Cartas 1-9 -->
+            <div class="page right-page">
+                <div class="page-header">
+                    <span class="page-number" id="rightPageNumber">Página 1</span>
                 </div>
                 <div class="cards-grid">
                     <div class="card-slot" data-slot="1"></div>
@@ -65,19 +99,50 @@
                     <div class="card-slot" data-slot="9"></div>
                 </div>
             </div>
-
-            <!-- Divisor do Livro -->
-            <div class="book-spine"></div>
-
-            <!-- Página Direita (cartas 10-18) -->
-            <div class="page right-page">
+        </div>
+        
+        <!-- Segunda Folha em diante (gerada dinamicamente) -->
+        <div class="book next-page" id="nextBook" style="display: none;">
+            <!-- Página Esquerda (cartas 10-18) -->
+            <div class="page left-page">
                 <div class="page-header">
-                    <span class="page-number" id="rightPageNumber">Página 2</span>
+                    <span class="page-number" id="leftPageNumber">Página 2</span>
                 </div>
                 <div class="cards-grid">
                     <div class="card-slot" data-slot="10"></div>
                     <div class="card-slot" data-slot="11"></div>
                     <div class="card-slot" data-slot="12"></div>
+                    <div class="card-slot" data-slot="13"></div>
+                    <div class="card-slot" data-slot="14"></div>
+                    <div class="card-slot" data-slot="15"></div>
+                    <div class="card-slot" data-slot="16"></div>
+                    <div class="card-slot" data-slot="17"></div>
+                    <div class="card-slot" data-slot="18"></div>
+                </div>
+            </div>
+
+            <!-- Divisor do Livro -->
+            <div class="book-spine"></div>
+
+            <!-- Página Direita (cartas 19-27) -->
+            <div class="page right-page">
+                <div class="page-header">
+                    <span class="page-number" id="rightPageNumber2">Página 3</span>
+                </div>
+                <div class="cards-grid">
+                    <div class="card-slot" data-slot="19"></div>
+                    <div class="card-slot" data-slot="20"></div>
+                    <div class="card-slot" data-slot="21"></div>
+                    <div class="card-slot" data-slot="22"></div>
+                    <div class="card-slot" data-slot="23"></div>
+                    <div class="card-slot" data-slot="24"></div>
+                    <div class="card-slot" data-slot="25"></div>
+                    <div class="card-slot" data-slot="26"></div>
+                    <div class="card-slot" data-slot="27"></div>
+                </div>
+            </div>
+        </div>
+    </div>
                     <div class="card-slot" data-slot="13"></div>
                     <div class="card-slot" data-slot="14"></div>
                     <div class="card-slot" data-slot="15"></div>

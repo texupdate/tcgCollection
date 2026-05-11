@@ -11,6 +11,7 @@ class Collection(db.Model):
     name = db.Column(db.String(200), nullable=False, unique=True)
     description = db.Column(db.Text)
     total_cards = db.Column(db.Integer, default=0)
+    notes = db.Column(db.Text, default='')  # Anotações do usuário
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relacionamento com cartas
@@ -23,6 +24,7 @@ class Collection(db.Model):
             'name': self.name,
             'description': self.description,
             'total_cards': self.total_cards,
+            'notes': self.notes or '',
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
     

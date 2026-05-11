@@ -109,7 +109,7 @@
 
                 container.innerHTML = collections.map(col => {
                     // Construir caminho da imagem baseado no nome da coleção
-                    const collectionImagePath = `/static/collection_bkg/${col.name}.png`;
+                    const collectionImagePath = `/static/collection_bkg/${col.name}.jpg`;
                     
                     return `
                     <div class="collection-card" onclick="viewCollection('${encodeURIComponent(col.name)}')">

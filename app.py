@@ -88,6 +88,7 @@ def update_collection(collection_id):
     collection.name = data.get('name', collection.name)
     collection.description = data.get('description', collection.description)
     collection.total_cards = data.get('total_cards', collection.total_cards)
+    collection.notes = data.get('notes', collection.notes)
     
     db.session.commit()
     
@@ -101,7 +102,16 @@ def delete_collection(collection_id):
     db.session.commit()
     
     return jsonify({'message': 'Collection deleted successfully'}), 200
-
+@app.route('/api/collections/<int:collection_id>/notes', methods=['PUT'])
+def update_collection_notes(collection_id):
+    """Atualiza apenas as anotações de uma coleção"""
+    collection = Collection.query.get_or_404(collection_id)
+    data = request.get_json()
+    
+    collection.notes = data.get('notes', '')
+    db.session.commit()
+    
+    return jsonify({'notes': collection.notes})
 # ============= CARDS ENDPOINTS =============
 
 @app.route('/api/collections/<int:collection_id>/cards', methods=['GET'])

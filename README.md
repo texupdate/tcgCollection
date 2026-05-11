@@ -100,4 +100,4 @@ MIT License
 
 ## 👤 Autor
 
-Seu Nome
+Texupdate - By Github Copilot

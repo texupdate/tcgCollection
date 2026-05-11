@@ -1,10 +1,13 @@
 let currentCollection = null;
 let currentCollectionName = null;
+let currentCollectionData = null;
 let currentPage = 0;
 let allCards = [];
-let minCardNumber = 0; // Número mínimo da coleção (0 ou 1)
-let searchTerm = ''; // Termo de busca
-const CARDS_PER_PAGE = 18;
+let minCardNumber = 0;
+let maxCardNumber = 0;
+let searchTerm = '';
+const CARDS_FIRST_PAGE = 9; // Primeira página (direita) tem 9 cartas
+const CARDS_PER_PAGE = 18; // Páginas seguintes tem 18 cartas (9 + 9)
 
 // Carrega as coleções ao iniciar
 window.addEventListener('DOMContentLoaded', () => {
@@ -192,22 +195,88 @@ function setFilter(filter) {
 // Carrega as cartas de uma coleção
 async function loadCards() {
     try {
-        const response = await fetch(`/api/collections/${currentCollection}/cards`);
-        allCards = await response.json();
+        // Buscar informações da coleção
+        const collectionResponse = await fetch(`/api/collections/${currentCollection}`);
+        currentCollectionData = await collectionResponse.json();
         
-        // Detectar o número mínimo da coleção (0 ou 1)
+        // Buscar cartas
+        const cardsResponse = await fetch(`/api/collections/${currentCollection}/cards`);
+        allCards = await cardsResponse.json();
+        
+        // Detectar o número mínimo e máximo da coleção
         if (allCards.length > 0) {
             minCardNumber = Math.min(...allCards.map(c => c.collection_number));
+            maxCardNumber = Math.max(...allCards.map(c => c.collection_number));
         } else {
             minCardNumber = 0;
+            maxCardNumber = 0;
         }
         
-        // Atualizar estatísticas
-        updateCollectionStats();
+        // Atualizar estatísticas na página de estatísticas
+        updateStatsPage();
+        
+        // Carregar anotações
+        loadNotes();
         
         renderCurrentPage();
     } catch (error) {
         console.error('Erro ao carregar cartas:', error);
+    }
+}
+
+// Atualiza a página de estatísticas
+function updateStatsPage() {
+    const totalCards = allCards.length;
+    const ownedCards = allCards.filter(card => card.quantity > 0).length;
+    const completionRate = totalCards > 0 ? ((ownedCards / totalCards) * 100).toFixed(1) : 0;
+    
+    document.getElementById('totalCardsStats').textContent = totalCards;
+    document.getElementById('ownedCardsStats').textContent = ownedCards;
+    document.getElementById('completionRateStats').textContent = `${completionRate}%`;
+    
+    // Mostrar a página de estatísticas
+    document.getElementById('statsPage').style.display = 'flex';
+}
+
+// Carrega as anotações da coleção
+function loadNotes() {
+    const notesTextarea = document.getElementById('collectionNotes');
+    if (currentCollectionData && currentCollectionData.notes) {
+        notesTextarea.value = currentCollectionData.notes;
+    } else {
+        notesTextarea.value = '';
+    }
+}
+
+// Salva as anotações da coleção
+async function saveNotes() {
+    const notesTextarea = document.getElementById('collectionNotes');
+    const notes = notesTextarea.value;
+    
+    try {
+        const response = await fetch(`/api/collections/${currentCollection}/notes`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ notes: notes })
+        });
+        
+        if (response.ok) {
+            // Feedback visual
+            const btn = document.querySelector('.btn-save-notes');
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Salvo!';
+            btn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Erro ao salvar anotações:', error);
+        alert('Erro ao salvar anotações!');
     }
 }
 
@@ -221,34 +290,81 @@ function renderCurrentPage() {
         );
     }
     
-    const startCardNumber = minCardNumber + (currentPage * CARDS_PER_PAGE);
-    const endCardNumber = startCardNumber + CARDS_PER_PAGE;
-    
-    // Obter todas as cartas da página atual
-    const pageCards = [];
-    for (let i = startCardNumber; i < endCardNumber; i++) {
-        const card = filteredCards.find(c => c.collection_number === i);
-        pageCards.push(card || null);
-    }
-    
-    // Renderizar cartas nos slots
-    for (let i = 0; i < CARDS_PER_PAGE; i++) {
-        const slotNumber = i + 1;
-        const cardNumber = startCardNumber + i;
-        const card = pageCards[i];
-        
-        const slot = document.querySelector(`.card-slot[data-slot="${slotNumber}"]`);
-        renderCardSlot(slot, card, cardNumber);
+    if (currentPage === 0) {
+        // Primeira página: apenas lado direito (cartas 1-9)
+        renderFirstPage(filteredCards);
+    } else {
+        // Páginas seguintes: ambos os lados (18 cartas por página)
+        renderOtherPages(filteredCards);
     }
     
     // Atualizar informações de paginação
     updatePagination();
 }
 
+// Renderiza a primeira página (cartas 1-9 no lado direito)
+function renderFirstPage(filteredCards) {
+    const startCardNumber = minCardNumber;
+    const endCardNumber = minCardNumber + CARDS_FIRST_PAGE;
+    
+    // Renderizar cartas 1-9 nos slots 1-9 (lado direito)
+    for (let i = 0; i < CARDS_FIRST_PAGE; i++) {
+        const cardNumber = startCardNumber + i;
+        const card = filteredCards.find(c => c.collection_number === cardNumber);
+        const slotNumber = i + 1;
+        const slot = document.querySelector(`.card-slot[data-slot="${slotNumber}"]`);
+        
+        if (slot) {
+            if (card) {
+                renderCardSlot(slot, card, cardNumber);
+            } else {
+                // Não mostrar se não existe carta
+                if (cardNumber <= maxCardNumber) {
+                    renderCardSlot(slot, null, cardNumber);
+                } else {
+                    slot.style.display = 'none';
+                }
+            }
+        }
+    }
+}
+
+// Renderiza páginas 2+ (18 cartas por página, 9 de cada lado)
+function renderOtherPages(filteredCards) {
+    // Calcular qual conjunto de 18 cartas mostrar
+    // Página 1 = cartas 10-27, Página 2 = cartas 28-45, etc
+    const startCardNumber = minCardNumber + CARDS_FIRST_PAGE + ((currentPage - 1) * CARDS_PER_PAGE);
+    const endCardNumber = startCardNumber + CARDS_PER_PAGE;
+    
+    // Renderizar 18 cartas (slots 10-27)
+    for (let i = 0; i < CARDS_PER_PAGE; i++) {
+        const cardNumber = startCardNumber + i;
+        const card = filteredCards.find(c => c.collection_number === cardNumber);
+        const slotNumber = 10 + i; // Slots começam em 10
+        const slot = document.querySelector(`.card-slot[data-slot="${slotNumber}"]`);
+        
+        if (slot) {
+            if (card) {
+                renderCardSlot(slot, card, cardNumber);
+            } else {
+                // Não mostrar se não existe carta ou passou do máximo
+                if (cardNumber <= maxCardNumber) {
+                    renderCardSlot(slot, null, cardNumber);
+                } else {
+                    slot.style.display = 'none';
+                }
+            }
+        }
+    }
+}
+
 // Renderiza um slot de carta
 function renderCardSlot(slot, card, cardNumber) {
+    if (!slot) return;
+    
     slot.innerHTML = '';
     slot.className = 'card-slot';
+    slot.style.display = 'flex'; // Garantir que está visível por padrão
     
     if (card) {
         // Carta existe
@@ -292,15 +408,9 @@ function renderCardSlot(slot, card, cardNumber) {
             </div>
         `;
     } else {
-        // Slot vazio
+        // Carta não existe - deixar slot vazio mas visível
         slot.classList.add('empty');
-        slot.innerHTML = `
-            <div style="text-align: center; color: #999;">
-                <div style="font-size: 2em;">📭</div>
-                <div style="font-size: 0.9em; margin-top: 10px;">Carta #${cardNumber}</div>
-                <div style="font-size: 0.8em; color: #bbb;">Não cadastrada</div>
-            </div>
-        `;
+        slot.style.display = 'none'; // Ocultar completamente
     }
 }
 
@@ -319,6 +429,7 @@ async function incrementCard(cardId) {
                 allCards[index] = updatedCard;
             }
             renderCurrentPage();
+            updateStatsPage();
             updateCollectionStats();
         }
     } catch (error) {
@@ -342,6 +453,7 @@ async function decrementCard(cardId) {
                 allCards[index] = updatedCard;
             }
             renderCurrentPage();
+            updateStatsPage();
             updateCollectionStats();
         }
     } catch (error) {
@@ -380,28 +492,52 @@ function getTotalCardsInCollection() {
 
 // Atualiza informações de paginação
 function updatePagination() {
-    const totalCards = getTotalCardsInCollection();
-    const totalPages = Math.ceil(totalCards / CARDS_PER_PAGE);
+    const totalCards = maxCardNumber - minCardNumber + 1;
     
-    const startCard = minCardNumber + (currentPage * CARDS_PER_PAGE);
-    const endCard = Math.min(startCard + CARDS_PER_PAGE - 1, minCardNumber + totalCards - 1);
+    // Calcular total de páginas (primeira página tem 9, resto tem 18)
+    const cardsAfterFirst = Math.max(0, totalCards - CARDS_FIRST_PAGE);
+    const totalPages = 1 + Math.ceil(cardsAfterFirst / CARDS_PER_PAGE);
+    
+    // Calcular qual faixa de cartas está sendo mostrada
+    let startCard, endCard, leftStart, leftEnd, rightStart, rightEnd;
+    
+    if (currentPage === 0) {
+        // Primeira página: apenas lado direito (cartas 1-9)
+        startCard = minCardNumber;
+        endCard = Math.min(minCardNumber + CARDS_FIRST_PAGE - 1, maxCardNumber);
+        rightStart = startCard;
+        rightEnd = endCard;
+        
+        document.getElementById('rightPageNumber').textContent = `Cartas ${rightStart}-${rightEnd}`;
+    } else {
+        // Páginas seguintes: ambos os lados (18 cartas)
+        startCard = minCardNumber + CARDS_FIRST_PAGE + ((currentPage - 1) * CARDS_PER_PAGE);
+        endCard = Math.min(startCard + CARDS_PER_PAGE - 1, maxCardNumber);
+        
+        // Lado esquerdo (9 cartas)
+        leftStart = startCard;
+        leftEnd = Math.min(startCard + 8, maxCardNumber);
+        
+        // Lado direito (9 cartas)
+        rightStart = startCard + 9;
+        rightEnd = Math.min(startCard + 17, maxCardNumber);
+        
+        document.getElementById('leftPageNumber').textContent = `Cartas ${leftStart}-${leftEnd}`;
+        document.getElementById('rightPageNumber2').textContent = `Cartas ${rightStart}-${rightEnd}`;
+    }
     
     document.getElementById('pageInfo').textContent = 
-        `Cartas ${startCard}-${endCard} de ${totalCards}`;
-    
-    const leftStart = startCard;
-    const leftEnd = Math.min(startCard + 8, endCard);
-    const rightStart = startCard + 9;
-    const rightEnd = endCard;
-    
-    document.getElementById('leftPageNumber').textContent = 
-        `Cartas ${leftStart}-${leftEnd}`;
-    document.getElementById('rightPageNumber').textContent = 
-        `Cartas ${rightStart}-${rightEnd}`;
+        `Cartas ${startCard}-${endCard} de ${maxCardNumber}`;
     
     // Habilitar/desabilitar botões
     document.getElementById('prevBtn').disabled = currentPage === 0;
     document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1 || totalCards === 0;
+    
+    // Mostrar/ocultar livro secundário
+    const nextBook = document.getElementById('nextBook');
+    if (nextBook) {
+        nextBook.style.display = currentPage > 0 ? 'flex' : 'none';
+    }
 }
 
 // Mostra estado vazio
