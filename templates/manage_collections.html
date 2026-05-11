@@ -9,11 +9,29 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📁 Gerenciar Pastas (Coleções)</h1>
-            <div class="nav-buttons">
-                <a href="/" class="btn btn-secondary">← Voltar ao Início</a>
-                <a href="/viewer" class="btn btn-secondary">📖 Visualizar Álbum</a>
-                <a href="/manage_cards" class="btn btn-secondary">🃏 Gerenciar Cartas</a>
+            <div class="header-center">
+                <div class="title-with-logo">
+                    <img src="/static/path_bkg.png" alt="PATH Logo" class="viewer-logo">
+                    <h1 id="pageTitle">Gerenciar Pastas (Coleções)</h1>
+                </div>
+                <div class="controls">
+                    <div class="sort-controls">
+                        <label for="sortSelect">Ordenar por:</label>
+                        <select id="sortSelect" onchange="sortCollections()">
+                            <option value="name-asc">📝 Nome (A-Z)</option>
+                            <option value="name-desc">📝 Nome (Z-A)</option>
+                            <option value="total-asc">📦 Qtd Total (Crescente)</option>
+                            <option value="total-desc">📦 Qtd Total (Decrescente)</option>
+                            <option value="completion-asc">📈 Completude (Crescente)</option>
+                            <option value="completion-desc">📈 Completude (Decrescente)</option>
+                        </select>
+                    </div>
+                    <div class="nav-buttons">
+                        <a href="/" class="btn btn-secondary">← Voltar ao Início</a>
+                        <a href="/viewer" class="btn btn-secondary">📖 Visualizar Álbum</a>
+                        <a href="/manage_cards" class="btn btn-secondary">🃏 Gerenciar Cartas</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -94,6 +112,9 @@
             }
         });
 
+        // Armazenar coleções globalmente para ordenação
+        let allCollections = [];
+
         // Carregar lista de coleções
         async function loadCollections() {
             try {
@@ -119,6 +140,19 @@
                         col.completionRate = 0;
                     }
                 }
+
+                // Armazenar e renderizar
+                allCollections = collections;
+                renderCollections();
+            } catch (error) {
+                console.error('Erro ao carregar coleções:', error);
+            }
+        }
+
+        // Renderizar coleções
+        function renderCollections() {
+            const container = document.getElementById('collections-list');
+            const collections = allCollections;
 
                 container.innerHTML = collections.map(col => {
                     // Construir caminho da imagem baseado no nome da coleção
@@ -157,9 +191,34 @@
                         </div>
                     </div>
                 `}).join('');
-            } catch (error) {
-                console.error('Erro ao carregar coleções:', error);
+        }
+
+        // Ordenar coleções
+        function sortCollections() {
+            const sortValue = document.getElementById('sortSelect').value;
+            
+            switch(sortValue) {
+                case 'name-asc':
+                    allCollections.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    allCollections.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+                case 'total-asc':
+                    allCollections.sort((a, b) => a.total_cards - b.total_cards);
+                    break;
+                case 'total-desc':
+                    allCollections.sort((a, b) => b.total_cards - a.total_cards);
+                    break;
+                case 'completion-asc':
+                    allCollections.sort((a, b) => parseFloat(a.completionRate) - parseFloat(b.completionRate));
+                    break;
+                case 'completion-desc':
+                    allCollections.sort((a, b) => parseFloat(b.completionRate) - parseFloat(a.completionRate));
+                    break;
             }
+            
+            renderCollections();
         }
 
         // Ver cartas da coleção
@@ -348,11 +407,82 @@
             font-size: 1.1em;
         }
 
+        /* Header e Controls */
+        .header-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title-with-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .viewer-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .sort-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .sort-controls label {
+            color: #333;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .sort-controls select {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+            min-width: 250px;
+        }
+
+        .sort-controls select:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
         .nav-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .sort-controls {
+                flex-direction: column;
+            }
+            
+            .sort-controls select {
+                width: 100%;
+            }
         }
     </style>
 </body>
