@@ -92,9 +92,9 @@ function changeCollection() {
     
     currentCollection = select.value;
     currentCollectionName = selectedOption.dataset.name;
-    currentPage = 0;
     searchTerm = ''; // Limpar busca ao trocar coleção
     document.getElementById('searchInput').value = '';
+    loadPageState(); // Restaurar página salva
     
     if (currentCollection) {
         // Atualizar URL sem recarregar a página
@@ -502,19 +502,47 @@ async function toggleCardOrigem(cardId) {
     }
 }
 
+// Primeira página
+function firstPage() {
+    if (currentPage !== 0) {
+        currentPage = 0;
+        savePageState();
+        renderCurrentPage();
+    }
+}
+
 // Página anterior
 function previousPage() {
     if (currentPage > 0) {
         currentPage--;
+        savePageState();
         renderCurrentPage();
     }
 }
 
 // Próxima página
 function nextPage() {
-    const totalPages = Math.ceil(getTotalCardsInCollection() / CARDS_PER_PAGE);
+    const totalCards = maxCardNumber - minCardNumber + 1;
+    const cardsAfterFirst = Math.max(0, totalCards - CARDS_FIRST_PAGE);
+    const totalPages = 1 + Math.ceil(cardsAfterFirst / CARDS_PER_PAGE);
+    
     if (currentPage < totalPages - 1) {
         currentPage++;
+        savePageState();
+        renderCurrentPage();
+    }
+}
+
+// Última página
+function lastPage() {
+    const totalCards = maxCardNumber - minCardNumber + 1;
+    const cardsAfterFirst = Math.max(0, totalCards - CARDS_FIRST_PAGE);
+    const totalPages = 1 + Math.ceil(cardsAfterFirst / CARDS_PER_PAGE);
+    const lastPageIndex = totalPages - 1;
+    
+    if (currentPage !== lastPageIndex) {
+        currentPage = lastPageIndex;
+        savePageState();
         renderCurrentPage();
     }
 }
@@ -570,8 +598,10 @@ function updatePagination() {
         `Cartas ${startCard}-${endCard} de ${maxCardNumber} | Página ${currentPage + 1}/${totalPages}`;
     
     // Habilitar/desabilitar botões
+    document.getElementById('firstBtn').disabled = currentPage === 0;
     document.getElementById('prevBtn').disabled = currentPage === 0;
     document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1 || totalCards === 0;
+    document.getElementById('lastBtn').disabled = currentPage >= totalPages - 1 || totalCards === 0;
 }
 
 // Mostra estado vazio
