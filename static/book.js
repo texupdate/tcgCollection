@@ -101,13 +101,68 @@ function changeCollection() {
             console.log('🔗 URL atualizada:', newUrl);
         }
         
+        // Atualizar título e imagem da coleção
+        updateCollectionHeader(currentCollectionName);
+        
         loadCards();
         hideEmptyState();
     } else {
         // Limpar parâmetro da URL se desselecionar
         window.history.pushState({}, '', window.location.pathname);
+        resetCollectionHeader();
         showEmptyState();
     }
+}
+
+// Atualiza o header com informações da coleção
+function updateCollectionHeader(collectionName) {
+    // Atualizar título
+    const pageTitle = document.getElementById('pageTitle');
+    pageTitle.textContent = `Coleção TCG - ${collectionName}`;
+    
+    // Atualizar imagem da coleção (esquerda)
+    const collectionLogoImg = document.getElementById('collectionLogoImg');
+    const collectionImagePath = `/static/collection_bkg/${collectionName}.png`;
+    collectionLogoImg.src = collectionImagePath;
+    collectionLogoImg.style.display = 'block';
+    collectionLogoImg.onerror = function() {
+        this.style.display = 'none';
+    };
+}
+
+// Reseta o header quando nenhuma coleção está selecionada
+function resetCollectionHeader() {
+    const pageTitle = document.getElementById('pageTitle');
+    pageTitle.textContent = 'Minha Coleção TCG';
+    
+    const collectionLogoImg = document.getElementById('collectionLogoImg');
+    collectionLogoImg.style.display = 'none';
+    
+    const statsBox = document.getElementById('collectionStats');
+    statsBox.style.display = 'none';
+}
+
+// Atualiza as estatísticas da coleção
+function updateCollectionStats() {
+    const statsBox = document.getElementById('collectionStats');
+    
+    if (allCards.length === 0) {
+        statsBox.style.display = 'none';
+        return;
+    }
+    
+    // Calcular estatísticas
+    const totalCards = allCards.length;
+    const ownedCards = allCards.filter(card => card.quantity > 0).length;
+    const completionRate = totalCards > 0 ? ((ownedCards / totalCards) * 100).toFixed(1) : 0;
+    
+    // Atualizar valores
+    document.getElementById('totalCards').textContent = totalCards;
+    document.getElementById('ownedCards').textContent = ownedCards;
+    document.getElementById('completionRate').textContent = `${completionRate}%`;
+    
+    // Mostrar o box de estatísticas
+    statsBox.style.display = 'block';
 }
 
 // Filtrar por busca de nome
@@ -146,6 +201,9 @@ async function loadCards() {
         } else {
             minCardNumber = 0;
         }
+        
+        // Atualizar estatísticas
+        updateCollectionStats();
         
         renderCurrentPage();
     } catch (error) {
@@ -261,6 +319,7 @@ async function incrementCard(cardId) {
                 allCards[index] = updatedCard;
             }
             renderCurrentPage();
+            updateCollectionStats();
         }
     } catch (error) {
         console.error('Erro ao incrementar carta:', error);
@@ -283,6 +342,7 @@ async function decrementCard(cardId) {
                 allCards[index] = updatedCard;
             }
             renderCurrentPage();
+            updateCollectionStats();
         }
     } catch (error) {
         console.error('Erro ao decrementar carta:', error);

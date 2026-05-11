@@ -8,13 +8,41 @@
 </head>
 <body>
     <div class="header">
-        <h1>🃏 Minha Coleção TCG</h1>
-        <div class="controls">
-            <select id="collectionSelect" onchange="changeCollection()">
-                <option value="">Selecione uma coleção...</option>
-            </select>
-            <input type="text" id="searchInput" placeholder="🔍 Buscar carta por nome..." oninput="filterBySearch()">
-            <a href="/" class="btn btn-manage">🏠 Menu Principal</a>
+        <!-- Imagem da Coleção (Esquerda) -->
+        <div class="collection-logo" id="collectionLogo">
+            <img src="/static/viewer_bkg.png" alt="Logo" id="collectionLogoImg" style="display: none;">
+        </div>
+        
+        <!-- Título Central -->
+        <div class="header-center">
+            <div class="title-with-logo">
+                <img src="/static/viewer_bkg.png" alt="TCG Logo" class="viewer-logo">
+                <h1 id="pageTitle">Minha Coleção TCG</h1>
+            </div>
+            <div class="controls">
+                <select id="collectionSelect" onchange="changeCollection()">
+                    <option value="">Selecione uma coleção...</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="🔍 Buscar carta por nome..." oninput="filterBySearch()">
+                <a href="/" class="btn btn-manage">🏠 Menu Principal</a>
+            </div>
+        </div>
+        
+        <!-- Estatísticas (Direita) -->
+        <div class="collection-stats-box" id="collectionStats" style="display: none;">
+            <h3>📊 Estatísticas</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total de Cartas:</span>
+                <span class="stat-value" id="totalCards">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Cartas que Possuo:</span>
+                <span class="stat-value" id="ownedCards">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Completude:</span>
+                <span class="stat-value stat-percentage" id="completionRate">0%</span>
+            </div>
         </div>
     </div>
 
