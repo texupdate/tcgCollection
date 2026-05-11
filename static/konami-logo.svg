@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" width="100" height="40">
-  <rect width="100" height="40" fill="#003366"/>
-  <text x="50" y="25" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">KONAMI</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <style>
+      .konami-bg { fill: #003087; }
+      .konami-text { fill: #FFFFFF; font-family: 'Arial Black', 'Arial Bold', sans-serif; font-weight: 900; font-size: 28px; }
+    </style>
+  </defs>
+  
+  <!-- Background Rectangle -->
+  <rect class="konami-bg" width="200" height="60" rx="4"/>
+  
+  <!-- KONAMI Text -->
+  <text class="konami-text" x="100" y="40" text-anchor="middle" letter-spacing="2">KONAMI</text>
+  
+  <!-- Optional border for polish -->
+  <rect width="200" height="60" rx="4" fill="none" stroke="#002060" stroke-width="2"/>
 </svg>
