@@ -480,6 +480,28 @@ async function decrementCard(cardId) {
     }
 }
 
+// Alterna entre Konami e Orica
+async function toggleCardOrigem(cardId) {
+    try {
+        const response = await fetch(`/api/cards/${cardId}/toggle-origem`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            const updatedCard = await response.json();
+            // Atualizar o card no array local
+            const index = allCards.findIndex(c => c.id === cardId);
+            if (index !== -1) {
+                allCards[index] = updatedCard;
+            }
+            renderCurrentPage();
+        }
+    } catch (error) {
+        console.error('Erro ao alternar origem da carta:', error);
+        alert('Erro ao alternar tipo da carta!');
+    }
+}
+
 // Página anterior
 function previousPage() {
     if (currentPage > 0) {
