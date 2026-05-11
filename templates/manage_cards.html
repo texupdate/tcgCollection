@@ -146,9 +146,11 @@
                                     </div>
                                 </td>
                                 <td>
-                                    ${card.tipoOrigem === 'Orica' ? 
-                                        '<span class="badge badge-orica">🎨 ORICA</span>' : 
-                                        '<span class="badge badge-konami">✨ KONAMI</span>'}
+                                    <span class="badge ${card.tipoOrigem === 'Orica' ? 'badge-orica' : 'badge-konami'} badge-clickable" 
+                                          onclick="toggleCardOrigem(${card.id})" 
+                                          title="Clique para alternar">
+                                        ${card.tipoOrigem === 'Orica' ? '🎨 ORICA' : '✨ KONAMI'}
+                                    </span>
                                 </td>
                                 <td><span class="quantity-badge">${card.quantity}</span></td>
                                 <td>${card.rarity || '-'}</td>
@@ -244,6 +246,24 @@
             }
         }
 
+        // Alternar entre Konami e Orica
+        async function toggleCardOrigem(cardId) {
+            try {
+                const response = await fetch(`/api/cards/${cardId}/toggle-origem`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    loadCards(); // Recarregar lista para atualizar
+                } else {
+                    alert('Erro ao alternar origem da carta');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao alternar origem da carta');
+            }
+        }
+
         // Inicializar
         loadCollections();
         loadCards();
@@ -315,6 +335,21 @@
         .badge-konami {
             background: #4facfe;
             color: white;
+        }
+
+        .badge-clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .badge-clickable:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge-clickable:active {
+            transform: scale(0.95);
         }
 
         .quantity-badge {

@@ -391,10 +391,10 @@ function renderCardSlot(slot, card, cardNumber) {
             slot.classList.add('zero-quantity');
         }
         
-        // Logo Konami ou texto Orica ao lado do número
+        // Logo Konami ou texto Orica ao lado do número (clicável para alternar)
         const origemHtml = card.tipoOrigem === 'Orica' 
-            ? '<span class="orica-text">Orica</span>'
-            : '<img src="/static/konami-logo.svg" alt="Konami" class="konami-logo" onerror="this.style.display=\'none\'">';
+            ? '<span class="orica-text origem-toggle" onclick="toggleCardOrigem(' + card.id + ')" title="Clique para mudar para Konami">Orica</span>'
+            : '<img src="/static/konami-logo.svg" alt="Konami" class="konami-logo origem-toggle" onclick="toggleCardOrigem(' + card.id + ')" title="Clique para mudar para Orica" onerror="this.style.display=\'none\'">';
         
         // Se não tem imagem, tenta buscar via API YGOPRODeck
         let imageUrl = card.image_url;

@@ -434,6 +434,22 @@ body::before {
     letter-spacing: 0.5px;
 }
 
+/* Toggle de Origem - Clicável */
+.origem-toggle {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.origem-toggle:hover {
+    transform: scale(1.15);
+    filter: brightness(1.2);
+}
+
+.origem-toggle:active {
+    transform: scale(0.95);
+}
+
 .card-number {
     font-weight: bold;
     color: #8B4513;

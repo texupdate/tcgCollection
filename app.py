@@ -243,6 +243,18 @@ def decrement_card_quantity(card_id):
     
     return jsonify(card.to_dict())
 
+@app.route('/api/cards/<int:card_id>/toggle-origem', methods=['POST'])
+def toggle_card_origem(card_id):
+    """Alterna entre Konami e Orica"""
+    card = Card.query.get_or_404(card_id)
+    
+    # Toggle: Konami <-> Orica
+    card.tipoOrigem = 'Orica' if card.tipoOrigem == 'Konami' else 'Konami'
+    
+    db.session.commit()
+    
+    return jsonify(card.to_dict())
+
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     """Retorna estatísticas da coleção"""
