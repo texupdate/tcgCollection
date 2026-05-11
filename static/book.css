@@ -231,6 +231,30 @@ body::before {
     gap: 20px;
 }
 
+/* Descrição da Coleção */
+.description-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.description-content h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #f39c12;
+    padding-bottom: 8px;
+}
+
+.description-content p {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+/* Estatísticas da Coleção */
 .stats-content {
     background: white;
     padding: 20px;

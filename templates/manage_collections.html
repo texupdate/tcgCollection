@@ -227,9 +227,40 @@
         }
 
         // Editar coleção
-        function editCollection(id) {
-            // TODO: Implementar modal de edição
-            alert('Funcionalidade de edição em desenvolvimento');
+        async function editCollection(id) {
+            const collection = allCollections.find(c => c.id === id);
+            if (!collection) return;
+            
+            const newName = prompt('Nome da Coleção:', collection.name);
+            if (newName === null) return;
+            
+            const newDescription = prompt('Descrição da Coleção:', collection.description || '');
+            if (newDescription === null) return;
+            
+            const newTotal = prompt('Total de Cartas:', collection.total_cards);
+            if (newTotal === null) return;
+            
+            try {
+                const response = await fetch(`/api/collections/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: newName,
+                        description: newDescription,
+                        total_cards: parseInt(newTotal)
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Coleção atualizada com sucesso!');
+                    loadCollections();
+                } else {
+                    alert('Erro ao atualizar coleção');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar coleção');
+            }
         }
 
         // Deletar coleção

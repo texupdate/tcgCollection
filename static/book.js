@@ -234,6 +234,16 @@ function updateStatsPage() {
     document.getElementById('ownedCardsStats').textContent = ownedCards;
     document.getElementById('completionRateStats').textContent = `${completionRate}%`;
     
+    // Atualizar descrição da coleção
+    const descriptionContent = document.getElementById('descriptionContent');
+    const descriptionText = document.getElementById('collectionDescription');
+    if (currentCollectionData && currentCollectionData.description) {
+        descriptionText.textContent = currentCollectionData.description;
+        descriptionContent.style.display = 'block';
+    } else {
+        descriptionContent.style.display = 'none';
+    }
+    
     // Mostrar a página de estatísticas
     document.getElementById('statsPage').style.display = 'flex';
 }
