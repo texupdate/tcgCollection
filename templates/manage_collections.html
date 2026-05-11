@@ -107,6 +107,19 @@
                     return;
                 }
 
+                // Carregar estatísticas de cada coleção
+                for (const col of collections) {
+                    try {
+                        const cardsResponse = await fetch(`/api/collections/${col.id}/cards`);
+                        const cards = await cardsResponse.json();
+                        col.ownedCards = cards.filter(c => c.quantity > 0).length;
+                        col.completionRate = col.total_cards > 0 ? ((col.ownedCards / col.total_cards) * 100).toFixed(1) : 0;
+                    } catch (error) {
+                        col.ownedCards = 0;
+                        col.completionRate = 0;
+                    }
+                }
+
                 container.innerHTML = collections.map(col => {
                     // Construir caminho da imagem baseado no nome da coleção
                     const collectionImagePath = `/static/collection_bkg/${col.name}.jpg`;
@@ -120,9 +133,24 @@
                         </div>
                         <h3>${col.name}</h3>
                         <p>${col.description || 'Sem descrição'}</p>
-                        <div class="collection-stats">
-                            <span>Total: ${col.total_cards} cartas</span>
+                        
+                        <!-- Estatísticas da Coleção -->
+                        <div class="collection-detailed-stats">
+                            <h4>Estatísticas da Coleção</h4>
+                            <div class="stat-row">
+                                <span>📦 Total de Cartas:</span>
+                                <span class="stat-value">${col.total_cards}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>✅ Cartas que Possuo:</span>
+                                <span class="stat-value">${col.ownedCards}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>📈 Completude:</span>
+                                <span class="stat-value stat-highlight">${col.completionRate}%</span>
+                            </div>
                         </div>
+                        
                         <div class="collection-actions" onclick="event.stopPropagation()">
                             <button onclick="editCollection(${col.id})" class="btn-edit">✏️</button>
                             <button onclick="deleteCollection(${col.id}, '${col.name}')" class="btn-delete">🗑️</button>

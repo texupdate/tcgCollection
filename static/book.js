@@ -290,11 +290,19 @@ function renderCurrentPage() {
         );
     }
     
+    // Controlar visibilidade dos livros
+    const firstBook = document.querySelector('.book-container .book:first-child');
+    const nextBook = document.getElementById('nextBook');
+    
     if (currentPage === 0) {
-        // Primeira página: apenas lado direito (cartas 1-9)
+        // Primeira página: mostrar primeiro livro (estatísticas + cartas 1-9)
+        if (firstBook) firstBook.style.display = 'flex';
+        if (nextBook) nextBook.style.display = 'none';
         renderFirstPage(filteredCards);
     } else {
-        // Páginas seguintes: ambos os lados (18 cartas por página)
+        // Páginas seguintes: esconder primeiro livro, mostrar segundo
+        if (firstBook) firstBook.style.display = 'none';
+        if (nextBook) nextBook.style.display = 'flex';
         renderOtherPages(filteredCards);
     }
     
@@ -532,12 +540,6 @@ function updatePagination() {
     // Habilitar/desabilitar botões
     document.getElementById('prevBtn').disabled = currentPage === 0;
     document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1 || totalCards === 0;
-    
-    // Mostrar/ocultar livro secundário
-    const nextBook = document.getElementById('nextBook');
-    if (nextBook) {
-        nextBook.style.display = currentPage > 0 ? 'flex' : 'none';
-    }
 }
 
 // Mostra estado vazio
