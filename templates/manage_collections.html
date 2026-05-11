@@ -166,7 +166,7 @@
                                  onerror="this.onerror=null; this.parentElement.innerHTML='📁';">
                         </div>
                         <h3>${col.name}</h3>
-                        <p>${col.description || 'Sem descrição'}</p>
+                        <p title="${col.description || 'Sem descrição'}">${col.description ? (col.description.length > 200 ? col.description.substring(0, 200) + '...' : col.description) : 'Sem descrição'}</p>
                         
                         <!-- Estatísticas da Coleção -->
                         <div class="collection-detailed-stats">
